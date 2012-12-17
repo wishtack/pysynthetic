@@ -1,7 +1,6 @@
 
+from synthetic import synthesizeMember, AccessorNameMakerUnderscore
 import unittest
-
-from pysynthetic import synthesizeMember, AccessorNameMakerUnderscore
 
 @synthesizeMember('minimalistMember')
 @synthesizeMember('memberWithDefaultValue', defaultValue = "default")
@@ -14,6 +13,10 @@ class TestBasic:
 
 @synthesizeMember('member', accessorNameMaker = AccessorNameMakerUnderscore())
 class TestUnderscore:
+    pass
+
+@synthesizeMember('readOnlyMember', readOnly = True)
+class TestReadOnly:
     pass
 
 class TestSynthesizer(unittest.TestCase):
@@ -46,6 +49,12 @@ class TestSynthesizer(unittest.TestCase):
     
     def testContract(self):
         pass
+    
+    def testReadOnly(self):
+        instance = TestReadOnly()
+        
+        self.assertTrue(hasattr(instance, 'readOnlyMember'))
+        self.assertFalse(hasattr(instance, 'setReadOnlyMember'))
 
 if __name__ == "__main__":
     unittest.main()
