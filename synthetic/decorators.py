@@ -29,3 +29,6 @@ def synthesizeMember(memberName : str,
                                                                 getterName,
                                                                 setterName,
                                                                 privateMemberName)
+
+def synthesizeConstructor():
+    return SyntheticDecoratorFactory().syntheticConstructorDecorator()

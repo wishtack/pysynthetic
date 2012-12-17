@@ -19,9 +19,9 @@ class TestUnderscore:
 class TestReadOnly:
     pass
 
-class TestSynthesizer(unittest.TestCase):
+class TestSynthesizeMember(unittest.TestCase):
 
-    def testSynthesize(self):
+    def testSynthesizeMember(self):
         instance = TestBasic()
         
         # Default default ;) member value is None.

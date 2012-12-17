@@ -36,36 +36,90 @@ class SyntheticDecoratorFactory:
         
         def decoratorFunction(cls):
             # Creating synthesization data if it does not exist.
-            self._makeSyntheticData(cls)
+            self._makeSyntheticDataIfNotExists(cls)
             
-            # Adding this member to synthesization data attribute.
-            cls._syntheticData.appendSyntheticMember(syntheticMember)
+            # Inserting this member at the beginning of the member list of synthesization data attribute
+            # because decorators are called in reversed order.
+            cls._syntheticData.insertSyntheticMemberAtBegin(syntheticMember)
             
-            self._overrideInit(cls)
+            self._overrideConstructor(cls)
             self._makeGetter(cls, accessorNameMaker, syntheticMember)
             self._makeSetter(cls, accessorNameMaker, syntheticMember)
             return cls
         return decoratorFunction
 
-    def _makeSyntheticData(self, cls):
-        if not hasattr(cls, '_syntheticData'):
-            cls._syntheticData = SyntheticData(originalInitMethod = cls.__init__)
+    def syntheticConstructorDecorator(self):
+        def decoratorFunction(cls):
+            # Creating synthesization data if it does not exist.
+            self._makeSyntheticDataIfNotExists(cls)
+            
+            # This will be used later to tell the new constructor to consume parameters to initialize members.
+            cls._syntheticData.setConsumeArguments(True)
+            
+            self._overrideConstructor(cls)
+            return cls
+        return decoratorFunction
 
-    def _overrideInit(self, cls):
+    def _makeSyntheticDataIfNotExists(self, cls):
+        if not hasattr(cls, '_syntheticData'):
+            cls._syntheticData = SyntheticData(originalConstructor = cls.__init__)
+
+    def _overrideConstructor(self, cls):
         # Retrieving synthesized member list and original init method.
-        originalInitMethod = cls._syntheticData.originalInitMethod()
+        originalConstructor = cls._syntheticData.originalConstructor()
         syntheticMemberList = cls._syntheticData.syntheticMemberList()
+        consumesParameters = cls._syntheticData.consumeArguments()
         
         # New init method that initializes members and calls the original init method.
         def init(instance, *args, **kwargs):
-            for syntheticMember in syntheticMemberList:
+            # _consumeParameters will tell us which arguments have been used in order to remove them.
+            argList = list(args)
+            
+            # We initialize members in a reversed order in order to be able to remove used args just after using them.
+            for index, syntheticMember in reversed(list(enumerate(syntheticMemberList))):
+                # Default value.
+                value = syntheticMember.defaultValue()
+                
+                if consumesParameters:
+                    value = self._consumeParameters(syntheticMember.memberName(),
+                                                    index,
+                                                    argList,
+                                                    kwargs,
+                                                    value)
+                
+                # Initalizing member with a value.
                 setattr(instance,
                         syntheticMember.privateMemberName(),
-                        syntheticMember.defaultValue())
-            originalInitMethod(instance, *args, **kwargs)
+                        value)
+            
+            originalConstructor(instance, *argList, **kwargs)
         
         # Setting init method.
         cls.__init__ = init
+
+    def _consumeParameters(self,
+                           memberName,
+                           memberIndex,
+                           argList,
+                           kwargs,
+                           defaultValue):
+        """Returns member's value from kwargs if found or from args if found or default value otherwise.
+It will also remove used values from kwargs and args after using them."""
+        
+        value = defaultValue
+        
+        # Using value from args.
+        if len(argList) > memberIndex:
+            value = argList[memberIndex]
+            # Removing value from args.
+            del argList[memberIndex]
+        
+        # Using value from wargs.
+        if memberName in kwargs:
+            value = kwargs[memberName]
+            del kwargs[memberName]
+        
+        return value
 
     def _makeGetter(self, cls, accessorNameMaker, syntheticMember):
         def getter(instance):
