@@ -14,7 +14,7 @@ class SyntheticData:
     def __init__(self, originalConstructor):
         self._originalConstructor = originalConstructor
         self._syntheticMemberList = []
-        self._consumeArguments = False
+        self._doesConsumeArguments = False
     
     def originalConstructor(self):
         return self._originalConstructor
@@ -26,9 +26,9 @@ class SyntheticData:
     def syntheticMemberList(self):
         return self._syntheticMemberList
     
-    def consumeArguments(self):
+    def doesConsumeArguments(self):
         """Tells if the generated constructor must consume parameters or just use the default values."""
-        return self._consumeArguments
+        return self._doesConsumeArguments
 
     def setConsumeArguments(self, _consumeArguments):
-        self._consumeArguments = _consumeArguments
+        self._doesConsumeArguments = _consumeArguments
