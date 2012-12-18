@@ -8,10 +8,11 @@
 #
 
 from contracts import contract
-
 from synthetic.i_accessor_name_maker import IAccessorNameMaker
 from synthetic.synthetic_data import SyntheticData
 from synthetic.synthetic_member import SyntheticMember
+import inspect
+
 
 
 class SyntheticDecoratorFactory:
@@ -68,7 +69,7 @@ class SyntheticDecoratorFactory:
         # Retrieving synthesized member list and original init method.
         originalConstructor = cls._syntheticData.originalConstructor()
         syntheticMemberList = cls._syntheticData.syntheticMemberList()
-        consumesParameters = cls._syntheticData.consumeArguments()
+        doesConsumeArguments = cls._syntheticData.doesConsumeArguments()
         
         # New init method that initializes members and calls the original init method.
         def init(instance, *args, **kwargs):
@@ -77,15 +78,21 @@ class SyntheticDecoratorFactory:
             
             # We initialize members in a reversed order in order to be able to remove used args just after using them.
             for index, syntheticMember in reversed(list(enumerate(syntheticMemberList))):
+                memberName = syntheticMember.memberName()
+                
                 # Default value.
                 value = syntheticMember.defaultValue()
+
+                # Tells if the argument is expected to be used by the original constructor.
+                mustKeepArgument = self._mustKeepArgument(originalConstructor, memberName)
                 
-                if consumesParameters:
-                    value = self._consumeParameters(syntheticMember.memberName(),
-                                                    index,
-                                                    argList,
-                                                    kwargs,
-                                                    value)
+                if doesConsumeArguments:
+                    value = self._consumeArgument(memberName,
+                                                  index,
+                                                  argList,
+                                                  kwargs,
+                                                  value,
+                                                  mustKeepArgument)
                 
                 # Initalizing member with a value.
                 setattr(instance,
@@ -97,12 +104,14 @@ class SyntheticDecoratorFactory:
         # Setting init method.
         cls.__init__ = init
 
-    def _consumeParameters(self,
-                           memberName,
-                           memberIndex,
-                           argList,
-                           kwargs,
-                           defaultValue):
+    @contract
+    def _consumeArgument(self,
+                         memberName: str,
+                         memberIndex: int,
+                         argList: list,
+                         kwargs: dict,
+                         defaultValue,
+                         mustKeepArgument: bool):
         """Returns member's value from kwargs if found or from args if found or default value otherwise.
 It will also remove used values from kwargs and args after using them."""
         
@@ -112,14 +121,33 @@ It will also remove used values from kwargs and args after using them."""
         if len(argList) > memberIndex:
             value = argList[memberIndex]
             # Removing value from args.
-            del argList[memberIndex]
+            if not mustKeepArgument:
+                del argList[memberIndex]
         
-        # Using value from wargs.
+        # Using value from kwargs.
         if memberName in kwargs:
             value = kwargs[memberName]
-            del kwargs[memberName]
+            if not mustKeepArgument:
+                del kwargs[memberName]
         
         return value
+
+    @contract
+    def _mustKeepArgument(self, originalConstructor, memberName: str):
+        if not inspect.isfunction(originalConstructor):
+            return False
+        
+        argSpec = inspect.getargspec(originalConstructor)
+        
+        # Original constructor is expecting variadic arguments or keyworded arguments.
+        if argSpec.varargs is not None or argSpec.keywords is not None:
+            return True
+        
+        # Argument is expected.
+        if memberName in argSpec.args:
+            return True
+        
+        return False
 
     def _makeGetter(self, cls, accessorNameMaker, syntheticMember):
         def getter(instance):
