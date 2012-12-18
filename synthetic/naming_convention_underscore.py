@@ -7,9 +7,9 @@
 # $Id: $
 #
 
-from synthetic.i_accessor_name_maker import IAccessorNameMaker
+from synthetic.i_naming_convention import INamingConvention
 
-class AccessorNameMakerUnderscore(IAccessorNameMaker):
+class NamingConventionUnderscore(INamingConvention):
     
     def getterName(self, memberName):
         return memberName

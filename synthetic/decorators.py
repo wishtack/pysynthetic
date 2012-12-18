@@ -8,8 +8,8 @@
 #
 
 from contracts import contract
-from synthetic.accessor_name_maker_camel_case import AccessorNameMakerCamelCase
-from synthetic.i_accessor_name_maker import IAccessorNameMaker
+from synthetic.naming_convention_camel_case import NamingConventionCamelCase
+from synthetic.i_naming_convention import INamingConvention
 from synthetic.synthetic_decorator_factory import SyntheticDecoratorFactory
 
 @contract
@@ -17,7 +17,7 @@ def synthesizeMember(memberName : str,
                defaultValue = None,
                contract : 'str|None' = None,
                readOnly : bool = False,
-               accessorNameMaker : IAccessorNameMaker = AccessorNameMakerCamelCase(),
+               namingConvention : INamingConvention = NamingConventionCamelCase(),
                getterName : 'str|None' = None,
                setterName : 'str|None' = None,
                privateMemberName : 'str|None' = None):
@@ -25,7 +25,7 @@ def synthesizeMember(memberName : str,
                                                                 defaultValue,
                                                                 contract,
                                                                 readOnly,
-                                                                accessorNameMaker,
+                                                                namingConvention,
                                                                 getterName,
                                                                 setterName,
                                                                 privateMemberName)

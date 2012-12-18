@@ -10,7 +10,7 @@ from contracts import contract
 
 from synthetic.synthetic_member import SyntheticMember
 
-class SyntheticData:
+class SyntheticMetaData:
     def __init__(self, originalConstructor):
         self._originalConstructor = originalConstructor
         self._syntheticMemberList = []

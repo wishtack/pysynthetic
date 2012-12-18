@@ -1,6 +1,15 @@
+#-*- coding: utf-8 -*-
+#
+# Created on Dec 17, 2012
+#
+# @author: Younes JAAIDI
+#
+# $Id: $
+#
 
-from synthetic import synthesizeMember, AccessorNameMakerUnderscore
 import unittest
+
+from synthetic import synthesizeMember, NamingConventionUnderscore
 
 @synthesizeMember('minimalistMember')
 @synthesizeMember('memberWithDefaultValue', defaultValue = "default")
@@ -11,7 +20,7 @@ import unittest
 class TestBasic:
     pass
 
-@synthesizeMember('member', accessorNameMaker = AccessorNameMakerUnderscore())
+@synthesizeMember('member', namingConvention = NamingConventionUnderscore())
 class TestUnderscore:
     pass
 
@@ -44,9 +53,16 @@ class TestSynthesizeMember(unittest.TestCase):
         self.assertEqual("newValue", instance._internalPrivateSecretMemberThatShouldNeverBeUsedOutsideThisClass)
         self.assertEqual("newValue", instance.giveMeTheCustomMember())
     
-    def testSynthesizeWithAccessorNameMakerUnderscore(self):
-        pass
-    
+    def testSynthesizeWithNamingConventionUnderscore(self):
+        instance = TestUnderscore()
+        
+        # Default default ;) member value is None.
+        self.assertEqual(None, instance.member())
+        
+        # Default set and get test. 
+        instance.set_member(10)
+        self.assertEqual(10, instance.member())
+        
     def testContract(self):
         pass
     
