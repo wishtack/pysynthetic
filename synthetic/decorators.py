@@ -15,7 +15,7 @@ from synthetic.synthetic_decorator_factory import SyntheticDecoratorFactory
 @contract
 def synthesizeMember(memberName : str,
                defaultValue = None,
-               contract : 'str|None' = None,
+               contract = None,
                readOnly : bool = False,
                namingConvention : INamingConvention = NamingConventionCamelCase(),
                getterName : 'str|None' = None,

@@ -14,7 +14,7 @@ class SyntheticMember:
     def __init__(self,
                  memberName : str,
                  defaultValue,
-                 contract : 'str|None',
+                 contract,
                  readOnly : bool,
                  getterName : 'str|None',
                  setterName : 'str|None',

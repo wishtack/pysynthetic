@@ -7,12 +7,13 @@
 # $Id: $
 #
 
+from collections import OrderedDict
 from contracts import contract
+from synthetic.i_naming_convention import INamingConvention
+from synthetic.synthetic_member import SyntheticMember
+from synthetic.synthetic_meta_data import SyntheticMetaData
 import inspect
 
-from synthetic.i_naming_convention import INamingConvention
-from synthetic.synthetic_meta_data import SyntheticMetaData
-from synthetic.synthetic_member import SyntheticMember
 
 class SyntheticDecoratorFactory:
 
@@ -20,7 +21,7 @@ class SyntheticDecoratorFactory:
     def syntheticMemberDecorator(self,
                                  memberName : str,
                                  defaultValue,
-                                 contract : 'str|None',
+                                 contract,
                                  readOnly : bool,
                                  namingConvention : INamingConvention,
                                  getterName : 'str|None',
@@ -70,83 +71,144 @@ class SyntheticDecoratorFactory:
         syntheticMemberList = cls.__syntheticMetaData__.syntheticMemberList()
         doesConsumeArguments = cls.__syntheticMetaData__.doesConsumeArguments()
         
-        # New init method that initializes members and calls the original init method.
         def init(instance, *args, **kwargs):
-            # _consumeParameters will tell us which arguments have been used in order to remove them.
-            argList = list(args)
+            # Original constructor's expected args.
+            originalConstructorExpectedArgList = []
+            doesExpectVariadicArgs = False
+            doesExpectKeywordedArgs = False
             
-            # We initialize members in a reversed order in order to be able to remove used args just after using them.
-            for index, syntheticMember in reversed(list(enumerate(syntheticMemberList))):
+            if inspect.isfunction(originalConstructor):
+                fullArgSpec = inspect.getfullargspec(originalConstructor)
+                # originalConstructorExpectedArgList = expected args - self.
+                originalConstructorExpectedArgList = fullArgSpec.args[1:]
+                doesExpectVariadicArgs = (fullArgSpec.varargs is not None)
+                doesExpectKeywordedArgs = (fullArgSpec.varkw is not None)
+                   
+            # Merge original constructor's args specification with member list and make an args dict.
+            positionalArgumentKeyValueList = self._positionalArgumentKeyValueList(originalConstructorExpectedArgList,
+                                                                                syntheticMemberList,
+                                                                                args)
+
+            # Set members values.
+            for syntheticMember in syntheticMemberList:
                 memberName = syntheticMember.memberName()
                 
                 # Default value.
                 value = syntheticMember.defaultValue()
 
-                # Tells if the argument is expected to be used by the original constructor.
-                mustKeepArgument = self._mustKeepArgument(originalConstructor, memberName)
-                
+                # Constructor is synthesized.
                 if doesConsumeArguments:
                     value = self._consumeArgument(memberName,
-                                                  index,
-                                                  argList,
+                                                  positionalArgumentKeyValueList,
                                                   kwargs,
-                                                  value,
-                                                  mustKeepArgument)
-                
+                                                  value)
+
                 # Initalizing member with a value.
                 setattr(instance,
                         syntheticMember.privateMemberName(),
                         value)
-            
-            originalConstructor(instance, *argList, **kwargs)
+
+            # Remove superfluous arguments that have been used for synthesization but are not expected by constructor.
+            args, kwargs = self._filterArgsAndKwargs(originalConstructorExpectedArgList,
+                                                   doesExpectVariadicArgs,
+                                                   doesExpectKeywordedArgs,
+                                                   syntheticMemberList,
+                                                   positionalArgumentKeyValueList,
+                                                   kwargs)
+            # Call original constructor.
+            originalConstructor(instance, *args, **kwargs)
         
         # Setting init method.
         cls.__init__ = init
 
     @contract
-    def _consumeArgument(self,
-                         memberName: str,
-                         memberIndex: int,
-                         argList: list,
-                         kwargs: dict,
-                         defaultValue,
-                         mustKeepArgument: bool):
-        """Returns member's value from kwargs if found or from args if found or default value otherwise.
-It will also remove used values from kwargs and args after using them."""
+    def _positionalArgumentKeyValueList(self,
+                                        originalConstructorExpectedArgList,
+                                        syntheticMemberList : list,
+                                        argTuple : tuple):
+        """Transforms args tuple to a dictionary mapping argument names to values using original constructor
+positional args specification, then it adds synthesized members at the end if they are not already present."""
         
-        value = defaultValue
+        # First, the list of expected arguments is set to original constructor's arg spec. 
+        expectedArgList = originalConstructorExpectedArgList.copy()
         
-        # Using value from args.
-        if len(argList) > memberIndex:
-            value = argList[memberIndex]
-            # Removing value from args.
-            if not mustKeepArgument:
-                del argList[memberIndex]
+        # ... then we append members that are not already present.
+        for syntheticMember in syntheticMemberList:
+            memberName = syntheticMember.memberName()
+            if memberName not in expectedArgList:
+                expectedArgList.append(memberName)
         
-        # Using value from kwargs.
-        if memberName in kwargs:
-            value = kwargs[memberName]
-            if not mustKeepArgument:
-                del kwargs[memberName]
+        # Makes a list of tuples (argumentName, argumentValue) with each element of each list (expectedArgList, argTuple)
+        # until the shortest list's end is reached.
+        positionalArgumentKeyValueList = list(zip(expectedArgList, argTuple))
         
-        return value
+        # Add remanining arguments (those that are not expected by the original constructor).
+        for argumentValue in argTuple[len(positionalArgumentKeyValueList):]:
+            positionalArgumentKeyValueList.append((None, argumentValue))
+
+        return positionalArgumentKeyValueList
 
     @contract
-    def _mustKeepArgument(self, originalConstructor, memberName: str):
-        if not inspect.isfunction(originalConstructor):
-            return False
+    def _consumeArgument(self,
+                         memberName: str,
+                         positionalArgumentKeyValueList: list,
+                         kwargs: dict,
+                         defaultValue):
+        """Returns member's value from kwargs if found or from positionalArgumentKeyValueList if found
+or default value otherwise."""
+        # Warning: we use this dict to simplify the usage of the key-value tuple list but be aware that this will
+        # merge superfluous arguments as they have the same key : None.
+        positionalArgumentDict = dict(positionalArgumentKeyValueList)
+     
+        if memberName in kwargs:
+            return kwargs[memberName]
+
+        if memberName in positionalArgumentDict:
+            return positionalArgumentDict[memberName]
+
+        return defaultValue
+
+    @contract
+    def _filterArgsAndKwargs(self,
+                           originalConstructorExpectedArgList : 'list(str)',
+                           doesExpectVariadicArgs : bool,
+                           doesExpectKeywordedArgs : bool,
+                           syntheticMemberList : list,
+                           positionalArgumentKeyValueList : list,
+                           keywordedArgDict : dict):
+        """Returns a tuple with variadic args and keyworded args after removing arguments that have been used to
+synthesize members and that are not expected by the original constructor.
+If original constructor accepts variadic args, all variadic args are forwarded.
+If original constructor accepts keyworded args, all keyworded args are forwarded."""
         
-        argSpec = inspect.getargspec(originalConstructor)
+        # List is initialized with all variadic arguments.
+        positionalArgumentKeyValueList = positionalArgumentKeyValueList.copy()
         
-        # Original constructor is expecting variadic arguments or keyworded arguments.
-        if argSpec.varargs is not None or argSpec.keywords is not None:
-            return True
+        # Warning: we use this dict to simplify the usage of the key-value tuple list but be aware that this will
+        # merge superfluous arguments as they have the same key : None.
+        positionalArgumentDict = dict(positionalArgumentKeyValueList)
         
-        # Argument is expected.
-        if memberName in argSpec.args:
-            return True
+        # Dict is initialized with all keyworded arguments.
+        keywordedArgDict = keywordedArgDict.copy()
         
-        return False
+        for syntheticMember in syntheticMemberList:
+            argumentName = syntheticMember.memberName()
+            
+            # Argument is expected by the original constructor.
+            if argumentName in originalConstructorExpectedArgList:
+                continue
+
+            # We filter args only if original constructor does not expected variadic args. 
+            if not doesExpectVariadicArgs and argumentName in positionalArgumentDict:
+                positionalArgumentKeyValueList = list(filter(lambda pair: pair[0] != argumentName,
+                                                             positionalArgumentKeyValueList))
+
+            # We filter args only if original constructor does not expected keyworded args. 
+            if not doesExpectKeywordedArgs and argumentName in keywordedArgDict:
+                del keywordedArgDict[argumentName]
+
+        positionalArgumentTuple = tuple([value for _, value in positionalArgumentKeyValueList])
+        return positionalArgumentTuple, keywordedArgDict
 
     def _makeGetter(self, cls, namingConvention, syntheticMember):
         def getter(instance):
