@@ -8,12 +8,11 @@
 #
 
 from contracts import contract
-from synthetic.i_accessor_name_maker import IAccessorNameMaker
-from synthetic.synthetic_data import SyntheticData
-from synthetic.synthetic_member import SyntheticMember
 import inspect
 
-
+from synthetic.i_naming_convention import INamingConvention
+from synthetic.synthetic_meta_data import SyntheticMetaData
+from synthetic.synthetic_member import SyntheticMember
 
 class SyntheticDecoratorFactory:
 
@@ -23,7 +22,7 @@ class SyntheticDecoratorFactory:
                                  defaultValue,
                                  contract : 'str|None',
                                  readOnly : bool,
-                                 accessorNameMaker : IAccessorNameMaker,
+                                 namingConvention : INamingConvention,
                                  getterName : 'str|None',
                                  setterName : 'str|None',
                                  privateMemberName : 'str|None'):
@@ -41,11 +40,11 @@ class SyntheticDecoratorFactory:
             
             # Inserting this member at the beginning of the member list of synthesization data attribute
             # because decorators are called in reversed order.
-            cls._syntheticData.insertSyntheticMemberAtBegin(syntheticMember)
+            cls.__syntheticMetaData__.insertSyntheticMemberAtBegin(syntheticMember)
             
             self._overrideConstructor(cls)
-            self._makeGetter(cls, accessorNameMaker, syntheticMember)
-            self._makeSetter(cls, accessorNameMaker, syntheticMember)
+            self._makeGetter(cls, namingConvention, syntheticMember)
+            self._makeSetter(cls, namingConvention, syntheticMember)
             return cls
         return decoratorFunction
 
@@ -55,21 +54,21 @@ class SyntheticDecoratorFactory:
             self._makeSyntheticDataIfNotExists(cls)
             
             # This will be used later to tell the new constructor to consume parameters to initialize members.
-            cls._syntheticData.setConsumeArguments(True)
+            cls.__syntheticMetaData__.setConsumeArguments(True)
             
             self._overrideConstructor(cls)
             return cls
         return decoratorFunction
 
     def _makeSyntheticDataIfNotExists(self, cls):
-        if not hasattr(cls, '_syntheticData'):
-            cls._syntheticData = SyntheticData(originalConstructor = cls.__init__)
+        if not hasattr(cls, '__syntheticMetaData__'):
+            cls.__syntheticMetaData__ = SyntheticMetaData(originalConstructor = cls.__init__)
 
     def _overrideConstructor(self, cls):
         # Retrieving synthesized member list and original init method.
-        originalConstructor = cls._syntheticData.originalConstructor()
-        syntheticMemberList = cls._syntheticData.syntheticMemberList()
-        doesConsumeArguments = cls._syntheticData.doesConsumeArguments()
+        originalConstructor = cls.__syntheticMetaData__.originalConstructor()
+        syntheticMemberList = cls.__syntheticMetaData__.syntheticMemberList()
+        doesConsumeArguments = cls.__syntheticMetaData__.doesConsumeArguments()
         
         # New init method that initializes members and calls the original init method.
         def init(instance, *args, **kwargs):
@@ -149,28 +148,28 @@ It will also remove used values from kwargs and args after using them."""
         
         return False
 
-    def _makeGetter(self, cls, accessorNameMaker, syntheticMember):
+    def _makeGetter(self, cls, namingConvention, syntheticMember):
         def getter(instance):
             return getattr(instance, syntheticMember.privateMemberName())
-        setattr(cls, self._getterName(accessorNameMaker, syntheticMember), getter)
+        setattr(cls, self._getterName(namingConvention, syntheticMember), getter)
     
-    def _makeSetter(self, cls, accessorNameMaker, syntheticMember):
+    def _makeSetter(self, cls, namingConvention, syntheticMember):
         # No setter if read only member.
         if syntheticMember.isReadOnly():
             return
         
         def setter(instance, value):
             setattr(instance, syntheticMember.privateMemberName(), value)
-        setattr(cls, self._setterName(accessorNameMaker, syntheticMember), setter)
+        setattr(cls, self._setterName(namingConvention, syntheticMember), setter)
 
-    def _getterName(self, accessorNameMaker, syntheticMember):
+    def _getterName(self, namingConvention, syntheticMember):
         getterName = syntheticMember.getterName()
         if getterName is None:
-            getterName = accessorNameMaker.getterName(syntheticMember.memberName())
+            getterName = namingConvention.getterName(syntheticMember.memberName())
         return getterName
     
-    def _setterName(self, accessorNameMaker, syntheticMember):
+    def _setterName(self, namingConvention, syntheticMember):
         setterName = syntheticMember.setterName()
         if setterName is None:
-            setterName = accessorNameMaker.setterName(syntheticMember.memberName())
+            setterName = namingConvention.setterName(syntheticMember.memberName())
         return setterName

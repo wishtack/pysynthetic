@@ -1,4 +1,4 @@
 
-from synthetic.accessor_name_maker_camel_case import AccessorNameMakerCamelCase
-from synthetic.accessor_name_maker_underscore import AccessorNameMakerUnderscore
+from synthetic.naming_convention_camel_case import NamingConventionCamelCase
+from synthetic.naming_convention_underscore import NamingConventionUnderscore
 from synthetic.decorators import synthesizeMember, synthesizeConstructor
