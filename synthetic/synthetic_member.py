@@ -12,13 +12,20 @@ from contracts import contract
 class SyntheticMember:
     @contract
     def __init__(self,
-                 memberName : str,
+                 memberName,
                  defaultValue,
                  contract,
-                 readOnly : bool,
-                 getterName : 'str|None',
-                 setterName : 'str|None',
-                 privateMemberName : 'str|None'):
+                 readOnly,
+                 getterName,
+                 setterName,
+                 privateMemberName):
+        """
+    :type memberName: str
+    :type readOnly: bool
+    :type getterName: str|None
+    :type setterName: str|None
+    :type privateMemberName: str|None
+"""
 
         if privateMemberName is None:
             privateMemberName = '_%s' % memberName

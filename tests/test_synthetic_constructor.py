@@ -44,7 +44,7 @@ class TestChild(TestIntermediate):
 @synthesizeConstructor()
 class TestCustomConstructor:
     # It's important to test annotations, this force us to use "getfullargspec" instead of "getargspec".
-    def __init__(self, overridenMember, extraMember, defaultValueMember : "by the way, let's test annotations" = None):
+    def __init__(self, overridenMember, extraMember, defaultValueMember = None):
         self._overridenMemberArgument = overridenMember
         self._extraMemberArgument = extraMember
         self._defaultValueMemberArgument = defaultValueMember

@@ -8,25 +8,36 @@
 #
 
 from collections import OrderedDict
-from contracts import contract
+from contracts import contract, new_contract
 from synthetic.i_naming_convention import INamingConvention
 from synthetic.synthetic_member import SyntheticMember
 from synthetic.synthetic_meta_data import SyntheticMetaData
+import copy
 import inspect
 
+new_contract('INamingConvention', INamingConvention)
+new_contract('SyntheticMember', SyntheticMember)
 
 class SyntheticDecoratorFactory:
 
     @contract
     def syntheticMemberDecorator(self,
-                                 memberName : str,
+                                 memberName,
                                  defaultValue,
                                  contract,
-                                 readOnly : bool,
-                                 namingConvention : INamingConvention,
-                                 getterName : 'str|None',
-                                 setterName : 'str|None',
-                                 privateMemberName : 'str|None'):
+                                 readOnly,
+                                 namingConvention,
+                                 getterName,
+                                 setterName,
+                                 privateMemberName):
+        """
+    :type memberName: str
+    :type readOnly: bool
+    :type namingConvention: INamingConvention
+    :type getterName: str|None
+    :type setterName: str|None
+    :type privateMemberName: str|None
+"""
         syntheticMember = SyntheticMember(memberName,
                                           defaultValue,
                                           contract,
@@ -62,8 +73,13 @@ class SyntheticDecoratorFactory:
         return decoratorFunction
 
     def _makeSyntheticDataIfNotExists(self, cls):
-        if not hasattr(cls, '__syntheticMetaData__'):
-            cls.__syntheticMetaData__ = SyntheticMetaData(originalConstructor = cls.__init__)
+        # SyntheticMetaData already exists.
+        if hasattr(cls, '__syntheticMetaData__'):
+            return
+        
+        # Othewise, we create it.
+        originalConstructor = getattr(cls, '__init__', None)
+        cls.__syntheticMetaData__ = SyntheticMetaData(originalConstructor = originalConstructor)
 
     def _overrideConstructor(self, cls):
         # Retrieving synthesized member list and original init method.
@@ -77,12 +93,12 @@ class SyntheticDecoratorFactory:
             doesExpectVariadicArgs = False
             doesExpectKeywordedArgs = False
             
-            if inspect.isfunction(originalConstructor):
-                fullArgSpec = inspect.getfullargspec(originalConstructor)
+            if inspect.isfunction(originalConstructor) or inspect.ismethod(originalConstructor):
+                argSpec = inspect.getargspec(originalConstructor)
                 # originalConstructorExpectedArgList = expected args - self.
-                originalConstructorExpectedArgList = fullArgSpec.args[1:]
-                doesExpectVariadicArgs = (fullArgSpec.varargs is not None)
-                doesExpectKeywordedArgs = (fullArgSpec.varkw is not None)
+                originalConstructorExpectedArgList = argSpec.args[1:]
+                doesExpectVariadicArgs = (argSpec.varargs is not None)
+                doesExpectKeywordedArgs = (argSpec.keywords is not None)
                    
             # Merge original constructor's args specification with member list and make an args dict.
             positionalArgumentKeyValueList = self._positionalArgumentKeyValueList(originalConstructorExpectedArgList,
@@ -110,13 +126,14 @@ class SyntheticDecoratorFactory:
 
             # Remove superfluous arguments that have been used for synthesization but are not expected by constructor.
             args, kwargs = self._filterArgsAndKwargs(originalConstructorExpectedArgList,
-                                                   doesExpectVariadicArgs,
-                                                   doesExpectKeywordedArgs,
-                                                   syntheticMemberList,
-                                                   positionalArgumentKeyValueList,
-                                                   kwargs)
+                                                     doesExpectVariadicArgs,
+                                                     doesExpectKeywordedArgs,
+                                                     syntheticMemberList,
+                                                     positionalArgumentKeyValueList,
+                                                     kwargs)
             # Call original constructor.
-            originalConstructor(instance, *args, **kwargs)
+            if originalConstructor is not None:
+                originalConstructor(instance, *args, **kwargs)
         
         # Setting init method.
         cls.__init__ = init
@@ -124,13 +141,16 @@ class SyntheticDecoratorFactory:
     @contract
     def _positionalArgumentKeyValueList(self,
                                         originalConstructorExpectedArgList,
-                                        syntheticMemberList : list,
-                                        argTuple : tuple):
+                                        syntheticMemberList,
+                                        argTuple):
         """Transforms args tuple to a dictionary mapping argument names to values using original constructor
-positional args specification, then it adds synthesized members at the end if they are not already present."""
+positional args specification, then it adds synthesized members at the end if they are not already present.
+    :type syntheticMemberList: list(SyntheticMember)
+    :type argTuple: tuple
+"""
         
         # First, the list of expected arguments is set to original constructor's arg spec. 
-        expectedArgList = originalConstructorExpectedArgList.copy()
+        expectedArgList = copy.copy(originalConstructorExpectedArgList)
         
         # ... then we append members that are not already present.
         for syntheticMember in syntheticMemberList:
@@ -150,12 +170,16 @@ positional args specification, then it adds synthesized members at the end if th
 
     @contract
     def _consumeArgument(self,
-                         memberName: str,
-                         positionalArgumentKeyValueList: list,
-                         kwargs: dict,
+                         memberName,
+                         positionalArgumentKeyValueList,
+                         kwargs,
                          defaultValue):
         """Returns member's value from kwargs if found or from positionalArgumentKeyValueList if found
-or default value otherwise."""
+or default value otherwise.
+    :type memberName: str
+    :type positionalArgumentKeyValueList: list(tuple)
+    :type kwargs: dict(str:*)
+"""
         # Warning: we use this dict to simplify the usage of the key-value tuple list but be aware that this will
         # merge superfluous arguments as they have the same key : None.
         positionalArgumentDict = dict(positionalArgumentKeyValueList)
@@ -170,19 +194,26 @@ or default value otherwise."""
 
     @contract
     def _filterArgsAndKwargs(self,
-                           originalConstructorExpectedArgList : 'list(str)',
-                           doesExpectVariadicArgs : bool,
-                           doesExpectKeywordedArgs : bool,
-                           syntheticMemberList : list,
-                           positionalArgumentKeyValueList : list,
-                           keywordedArgDict : dict):
+                           originalConstructorExpectedArgList,
+                           doesExpectVariadicArgs,
+                           doesExpectKeywordedArgs,
+                           syntheticMemberList,
+                           positionalArgumentKeyValueList,
+                           keywordedArgDict):
         """Returns a tuple with variadic args and keyworded args after removing arguments that have been used to
 synthesize members and that are not expected by the original constructor.
 If original constructor accepts variadic args, all variadic args are forwarded.
-If original constructor accepts keyworded args, all keyworded args are forwarded."""
+If original constructor accepts keyworded args, all keyworded args are forwarded.
+    :type originalConstructorExpectedArgList: list(str)
+    :type doesExpectVariadicArgs: bool
+    :type doesExpectKeywordedArgs: bool
+    :type syntheticMemberList: list(SyntheticMember)
+    :type positionalArgumentKeyValueList: list(tuple)
+    :type keywordedArgDict: dict(str:*)
+"""
         
         # List is initialized with all variadic arguments.
-        positionalArgumentKeyValueList = positionalArgumentKeyValueList.copy()
+        positionalArgumentKeyValueList = copy.copy(positionalArgumentKeyValueList)
         
         # Warning: we use this dict to simplify the usage of the key-value tuple list but be aware that this will
         # merge superfluous arguments as they have the same key : None.
