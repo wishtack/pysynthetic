@@ -13,14 +13,22 @@ from synthetic.i_naming_convention import INamingConvention
 from synthetic.synthetic_decorator_factory import SyntheticDecoratorFactory
 
 @contract
-def synthesizeMember(memberName : str,
+def synthesizeMember(memberName,
                defaultValue = None,
                contract = None,
-               readOnly : bool = False,
-               namingConvention : INamingConvention = NamingConventionCamelCase(),
-               getterName : 'str|None' = None,
-               setterName : 'str|None' = None,
-               privateMemberName : 'str|None' = None):
+               readOnly = False,
+               namingConvention = NamingConventionCamelCase(),
+               getterName = None,
+               setterName = None,
+               privateMemberName = None):
+    """
+        :type memberName: str
+        :type readOnly: bool
+        :type namingConvention: INamingConvention
+        :type getterName: str|None
+        :type setterName: str|None
+        :type privateMemberName: str|None
+    """
     return SyntheticDecoratorFactory().syntheticMemberDecorator(memberName,
                                                                 defaultValue,
                                                                 contract,

@@ -6,9 +6,11 @@
 #
 # $Id: $
 #
-from contracts import contract
+from contracts import contract, new_contract
 
 from synthetic.synthetic_member import SyntheticMember
+
+new_contract('SyntheticMember', SyntheticMember)
 
 class SyntheticMetaData:
     def __init__(self, originalConstructor):
@@ -20,7 +22,10 @@ class SyntheticMetaData:
         return self._originalConstructor
 
     @contract
-    def insertSyntheticMemberAtBegin(self, synthesizedMember : SyntheticMember):
+    def insertSyntheticMemberAtBegin(self, synthesizedMember):
+        """
+    :type synthesizedMember: SyntheticMember 
+"""
         self._syntheticMemberList.insert(0, synthesizedMember)
     
     def syntheticMemberList(self):
