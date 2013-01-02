@@ -7,28 +7,40 @@
 # $Id: $
 #
 
-from contracts import contract
-from synthetic.accessor_name_maker_camel_case import AccessorNameMakerCamelCase
-from synthetic.i_accessor_name_maker import IAccessorNameMaker
+from contracts import contract, new_contract
+from synthetic.i_naming_convention import INamingConvention
 from synthetic.synthetic_decorator_factory import SyntheticDecoratorFactory
 
+new_contract('INamingConvention', INamingConvention)
+
 @contract
-def synthesizeMember(memberName : str,
+def synthesizeMember(memberName,
                defaultValue = None,
-               contract : 'str|None' = None,
-               readOnly : bool = False,
-               accessorNameMaker : IAccessorNameMaker = AccessorNameMakerCamelCase(),
-               getterName : 'str|None' = None,
-               setterName : 'str|None' = None,
-               privateMemberName : 'str|None' = None):
+               contract = None,
+               readOnly = False,
+               getterName = None,
+               setterName = None,
+               privateMemberName = None):
+    """
+    :type memberName: str
+    :type readOnly: bool
+    :type getterName: str|None
+    :type setterName: str|None
+    :type privateMemberName: str|None
+"""
     return SyntheticDecoratorFactory().syntheticMemberDecorator(memberName,
                                                                 defaultValue,
                                                                 contract,
                                                                 readOnly,
-                                                                accessorNameMaker,
                                                                 getterName,
                                                                 setterName,
                                                                 privateMemberName)
 
 def synthesizeConstructor():
     return SyntheticDecoratorFactory().syntheticConstructorDecorator()
+
+def namingConvention(namingConvention):
+    """
+    :type namingConvention: INamingConvention
+"""
+    return SyntheticDecoratorFactory().namingConventionDecorator(namingConvention)

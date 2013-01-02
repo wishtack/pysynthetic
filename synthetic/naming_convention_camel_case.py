@@ -7,9 +7,9 @@
 # $Id: $
 #
 
-from synthetic.i_accessor_name_maker import IAccessorNameMaker
+from synthetic.i_naming_convention import INamingConvention
 
-class AccessorNameMakerCamelCase(IAccessorNameMaker):
+class NamingConventionCamelCase(INamingConvention):
     
     def getterName(self, memberName):
         return memberName

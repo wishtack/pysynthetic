@@ -9,7 +9,7 @@
 
 from abc import abstractmethod
 
-class IAccessorNameMaker:
+class INamingConvention:
     
     @abstractmethod
     def getterName(self, memberName):

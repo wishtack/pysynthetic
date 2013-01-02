@@ -7,25 +7,35 @@
 # $Id: $
 #
 
-from contracts import contract
-
-from synthetic.i_accessor_name_maker import IAccessorNameMaker
-from synthetic.synthetic_data import SyntheticData
+from contracts import contract, new_contract
+from synthetic.i_naming_convention import INamingConvention
+from synthetic.naming_convention_camel_case import NamingConventionCamelCase
 from synthetic.synthetic_member import SyntheticMember
+from synthetic.synthetic_meta_data import SyntheticMetaData
+import copy
+import inspect
 
+new_contract('INamingConvention', INamingConvention)
+new_contract('SyntheticMember', SyntheticMember)
 
 class SyntheticDecoratorFactory:
 
     @contract
     def syntheticMemberDecorator(self,
-                                 memberName : str,
+                                 memberName,
                                  defaultValue,
-                                 contract : 'str|None',
-                                 readOnly : bool,
-                                 accessorNameMaker : IAccessorNameMaker,
-                                 getterName : 'str|None',
-                                 setterName : 'str|None',
-                                 privateMemberName : 'str|None'):
+                                 contract,
+                                 readOnly,
+                                 getterName,
+                                 setterName,
+                                 privateMemberName):
+        """
+    :type memberName: str
+    :type readOnly: bool
+    :type getterName: str|None
+    :type setterName: str|None
+    :type privateMemberName: str|None
+"""
         syntheticMember = SyntheticMember(memberName,
                                           defaultValue,
                                           contract,
@@ -34,115 +44,249 @@ class SyntheticDecoratorFactory:
                                           setterName,
                                           privateMemberName)
         
-        def decoratorFunction(cls):
-            # Creating synthesization data if it does not exist.
-            self._makeSyntheticDataIfNotExists(cls)
-            
+        def decoratorFunction(cls):            
             # Inserting this member at the beginning of the member list of synthesization data attribute
             # because decorators are called in reversed order.
-            cls._syntheticData.insertSyntheticMemberAtBegin(syntheticMember)
+            self._syntheticMetaData(cls).insertSyntheticMemberAtBegin(syntheticMember)
             
-            self._overrideConstructor(cls)
-            self._makeGetter(cls, accessorNameMaker, syntheticMember)
-            self._makeSetter(cls, accessorNameMaker, syntheticMember)
+            self._updateClass(cls)
             return cls
         return decoratorFunction
 
     def syntheticConstructorDecorator(self):
-        def decoratorFunction(cls):
-            # Creating synthesization data if it does not exist.
-            self._makeSyntheticDataIfNotExists(cls)
-            
+        def functionWrapper(cls):            
             # This will be used later to tell the new constructor to consume parameters to initialize members.
-            cls._syntheticData.setConsumeArguments(True)
+            self._syntheticMetaData(cls).setConsumeArguments(True)
             
-            self._overrideConstructor(cls)
+            self._updateClass(cls)
+            return cls
+        return functionWrapper
+    
+    def namingConventionDecorator(self, namingConvention):
+        """
+    :type namingConvention:INamingConvention
+"""
+        def decoratorFunction(cls):
+            # Remove getters and setters with old naming convention.
+            self._clearGettersAndSetters(cls)
+            
+            # Set new naming convention.
+            self._syntheticMetaData(cls).setNamingConvention(namingConvention)
+            
+            # Update constructor and recreate getters and setters.
+            self._updateClass(cls)
             return cls
         return decoratorFunction
 
-    def _makeSyntheticDataIfNotExists(self, cls):
-        if not hasattr(cls, '_syntheticData'):
-            cls._syntheticData = SyntheticData(originalConstructor = cls.__init__)
+    def _syntheticMetaData(self, cls):
+        # SyntheticMetaData does not exist...
+        syntheticMetaDataName = '__syntheticMetaData__'
+        if not hasattr(cls, syntheticMetaDataName):
+            # ...we create it.
+            originalConstructor = getattr(cls, '__init__', None)
+            syntheticMetaData = SyntheticMetaData(originalConstructor = originalConstructor,
+                                                  namingConvention = NamingConventionCamelCase())
+            setattr(cls, syntheticMetaDataName, syntheticMetaData)
+        return getattr(cls, syntheticMetaDataName)
+
+    def _updateClass(self, cls):
+        """We overwrite constructor, getters and setters every time because the constructor might have to consume all
+members even if their decorator is below the "synthesizeConstructor" decorator and it also might need to update
+the getters and setters because the naming convention has changed.
+"""
+        self._overrideConstructor(cls)
+        for syntheticMember in self._syntheticMetaData(cls).syntheticMemberList():
+            self._makeGetter(cls, syntheticMember)
+            self._makeSetter(cls, syntheticMember)
 
     def _overrideConstructor(self, cls):
         # Retrieving synthesized member list and original init method.
-        originalConstructor = cls._syntheticData.originalConstructor()
-        syntheticMemberList = cls._syntheticData.syntheticMemberList()
-        consumesParameters = cls._syntheticData.consumeArguments()
+        syntheticMetaData = self._syntheticMetaData(cls)
+        originalConstructor = syntheticMetaData.originalConstructor()
+        syntheticMemberList = syntheticMetaData.syntheticMemberList()
+        doesConsumeArguments = syntheticMetaData.doesConsumeArguments()
         
-        # New init method that initializes members and calls the original init method.
         def init(instance, *args, **kwargs):
-            # _consumeParameters will tell us which arguments have been used in order to remove them.
-            argList = list(args)
+            # Original constructor's expected args.
+            originalConstructorExpectedArgList = []
+            doesExpectVariadicArgs = False
+            doesExpectKeywordedArgs = False
             
-            # We initialize members in a reversed order in order to be able to remove used args just after using them.
-            for index, syntheticMember in reversed(list(enumerate(syntheticMemberList))):
+            if inspect.isfunction(originalConstructor) or inspect.ismethod(originalConstructor):
+                argSpec = inspect.getargspec(originalConstructor)
+                # originalConstructorExpectedArgList = expected args - self.
+                originalConstructorExpectedArgList = argSpec.args[1:]
+                doesExpectVariadicArgs = (argSpec.varargs is not None)
+                doesExpectKeywordedArgs = (argSpec.keywords is not None)
+                   
+            # Merge original constructor's args specification with member list and make an args dict.
+            positionalArgumentKeyValueList = self._positionalArgumentKeyValueList(originalConstructorExpectedArgList,
+                                                                                syntheticMemberList,
+                                                                                args)
+
+            # Set members values.
+            for syntheticMember in syntheticMemberList:
+                memberName = syntheticMember.memberName()
+                
                 # Default value.
                 value = syntheticMember.defaultValue()
-                
-                if consumesParameters:
-                    value = self._consumeParameters(syntheticMember.memberName(),
-                                                    index,
-                                                    argList,
-                                                    kwargs,
-                                                    value)
-                
+
+                # Constructor is synthesized.
+                if doesConsumeArguments:
+                    value = self._consumeArgument(memberName,
+                                                  positionalArgumentKeyValueList,
+                                                  kwargs,
+                                                  value)
+
                 # Initalizing member with a value.
                 setattr(instance,
                         syntheticMember.privateMemberName(),
                         value)
-            
-            originalConstructor(instance, *argList, **kwargs)
+
+            # Remove superfluous arguments that have been used for synthesization but are not expected by constructor.
+            args, kwargs = self._filterArgsAndKwargs(originalConstructorExpectedArgList,
+                                                     doesExpectVariadicArgs,
+                                                     doesExpectKeywordedArgs,
+                                                     syntheticMemberList,
+                                                     positionalArgumentKeyValueList,
+                                                     kwargs)
+            # Call original constructor.
+            if originalConstructor is not None:
+                originalConstructor(instance, *args, **kwargs)
         
         # Setting init method.
         cls.__init__ = init
 
-    def _consumeParameters(self,
-                           memberName,
-                           memberIndex,
-                           argList,
-                           kwargs,
-                           defaultValue):
-        """Returns member's value from kwargs if found or from args if found or default value otherwise.
-It will also remove used values from kwargs and args after using them."""
+    @contract
+    def _positionalArgumentKeyValueList(self,
+                                        originalConstructorExpectedArgList,
+                                        syntheticMemberList,
+                                        argTuple):
+        """Transforms args tuple to a dictionary mapping argument names to values using original constructor
+positional args specification, then it adds synthesized members at the end if they are not already present.
+    :type syntheticMemberList: list(SyntheticMember)
+    :type argTuple: tuple
+"""
         
-        value = defaultValue
+        # First, the list of expected arguments is set to original constructor's arg spec. 
+        expectedArgList = copy.copy(originalConstructorExpectedArgList)
         
-        # Using value from args.
-        if len(argList) > memberIndex:
-            value = argList[memberIndex]
-            # Removing value from args.
-            del argList[memberIndex]
+        # ... then we append members that are not already present.
+        for syntheticMember in syntheticMemberList:
+            memberName = syntheticMember.memberName()
+            if memberName not in expectedArgList:
+                expectedArgList.append(memberName)
         
-        # Using value from wargs.
-        if memberName in kwargs:
-            value = kwargs[memberName]
-            del kwargs[memberName]
+        # Makes a list of tuples (argumentName, argumentValue) with each element of each list (expectedArgList, argTuple)
+        # until the shortest list's end is reached.
+        positionalArgumentKeyValueList = list(zip(expectedArgList, argTuple))
         
-        return value
+        # Add remanining arguments (those that are not expected by the original constructor).
+        for argumentValue in argTuple[len(positionalArgumentKeyValueList):]:
+            positionalArgumentKeyValueList.append((None, argumentValue))
 
-    def _makeGetter(self, cls, accessorNameMaker, syntheticMember):
+        return positionalArgumentKeyValueList
+
+    @contract
+    def _consumeArgument(self,
+                         memberName,
+                         positionalArgumentKeyValueList,
+                         kwargs,
+                         defaultValue):
+        """Returns member's value from kwargs if found or from positionalArgumentKeyValueList if found
+or default value otherwise.
+    :type memberName: str
+    :type positionalArgumentKeyValueList: list(tuple)
+    :type kwargs: dict(str:*)
+"""
+        # Warning: we use this dict to simplify the usage of the key-value tuple list but be aware that this will
+        # merge superfluous arguments as they have the same key : None.
+        positionalArgumentDict = dict(positionalArgumentKeyValueList)
+     
+        if memberName in kwargs:
+            return kwargs[memberName]
+
+        if memberName in positionalArgumentDict:
+            return positionalArgumentDict[memberName]
+
+        return defaultValue
+
+    @contract
+    def _filterArgsAndKwargs(self,
+                           originalConstructorExpectedArgList,
+                           doesExpectVariadicArgs,
+                           doesExpectKeywordedArgs,
+                           syntheticMemberList,
+                           positionalArgumentKeyValueList,
+                           keywordedArgDict):
+        """Returns a tuple with variadic args and keyworded args after removing arguments that have been used to
+synthesize members and that are not expected by the original constructor.
+If original constructor accepts variadic args, all variadic args are forwarded.
+If original constructor accepts keyworded args, all keyworded args are forwarded.
+    :type originalConstructorExpectedArgList: list(str)
+    :type doesExpectVariadicArgs: bool
+    :type doesExpectKeywordedArgs: bool
+    :type syntheticMemberList: list(SyntheticMember)
+    :type positionalArgumentKeyValueList: list(tuple)
+    :type keywordedArgDict: dict(str:*)
+"""
+        
+        # List is initialized with all variadic arguments.
+        positionalArgumentKeyValueList = copy.copy(positionalArgumentKeyValueList)
+        
+        # Warning: we use this dict to simplify the usage of the key-value tuple list but be aware that this will
+        # merge superfluous arguments as they have the same key : None.
+        positionalArgumentDict = dict(positionalArgumentKeyValueList)
+        
+        # Dict is initialized with all keyworded arguments.
+        keywordedArgDict = keywordedArgDict.copy()
+        
+        for syntheticMember in syntheticMemberList:
+            argumentName = syntheticMember.memberName()
+            
+            # Argument is expected by the original constructor.
+            if argumentName in originalConstructorExpectedArgList:
+                continue
+
+            # We filter args only if original constructor does not expected variadic args. 
+            if not doesExpectVariadicArgs and argumentName in positionalArgumentDict:
+                positionalArgumentKeyValueList = list(filter(lambda pair: pair[0] != argumentName,
+                                                             positionalArgumentKeyValueList))
+
+            # We filter args only if original constructor does not expected keyworded args. 
+            if not doesExpectKeywordedArgs and argumentName in keywordedArgDict:
+                del keywordedArgDict[argumentName]
+
+        positionalArgumentTuple = tuple([value for _, value in positionalArgumentKeyValueList])
+        return positionalArgumentTuple, keywordedArgDict
+
+    def _clearGettersAndSetters(self, cls):
+        for syntheticMember in self._syntheticMetaData(cls).syntheticMemberList():
+            delattr(cls, self._getterName(cls, syntheticMember))
+            delattr(cls, self._setterName(cls, syntheticMember))
+
+    def _makeGetter(self, cls, syntheticMember):
         def getter(instance):
             return getattr(instance, syntheticMember.privateMemberName())
-        setattr(cls, self._getterName(accessorNameMaker, syntheticMember), getter)
+        setattr(cls, self._getterName(cls, syntheticMember), getter)
     
-    def _makeSetter(self, cls, accessorNameMaker, syntheticMember):
+    def _makeSetter(self, cls, syntheticMember):
         # No setter if read only member.
         if syntheticMember.isReadOnly():
             return
         
         def setter(instance, value):
             setattr(instance, syntheticMember.privateMemberName(), value)
-        setattr(cls, self._setterName(accessorNameMaker, syntheticMember), setter)
+        setattr(cls, self._setterName(cls, syntheticMember), setter)
 
-    def _getterName(self, accessorNameMaker, syntheticMember):
+    def _getterName(self, cls, syntheticMember):
         getterName = syntheticMember.getterName()
         if getterName is None:
-            getterName = accessorNameMaker.getterName(syntheticMember.memberName())
+            getterName = self._syntheticMetaData(cls).namingConvention().getterName(syntheticMember.memberName())
         return getterName
     
-    def _setterName(self, accessorNameMaker, syntheticMember):
+    def _setterName(self, cls, syntheticMember):
         setterName = syntheticMember.setterName()
         if setterName is None:
-            setterName = accessorNameMaker.setterName(syntheticMember.memberName())
+            setterName = self._syntheticMetaData(cls).namingConvention().setterName(syntheticMember.memberName())
         return setterName
