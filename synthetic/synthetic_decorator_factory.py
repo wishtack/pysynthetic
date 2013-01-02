@@ -7,9 +7,9 @@
 # $Id: $
 #
 
-from collections import OrderedDict
 from contracts import contract, new_contract
 from synthetic.i_naming_convention import INamingConvention
+from synthetic.naming_convention_camel_case import NamingConventionCamelCase
 from synthetic.synthetic_member import SyntheticMember
 from synthetic.synthetic_meta_data import SyntheticMetaData
 import copy
@@ -26,14 +26,12 @@ class SyntheticDecoratorFactory:
                                  defaultValue,
                                  contract,
                                  readOnly,
-                                 namingConvention,
                                  getterName,
                                  setterName,
                                  privateMemberName):
         """
     :type memberName: str
     :type readOnly: bool
-    :type namingConvention: INamingConvention
     :type getterName: str|None
     :type setterName: str|None
     :type privateMemberName: str|None
@@ -46,46 +44,67 @@ class SyntheticDecoratorFactory:
                                           setterName,
                                           privateMemberName)
         
-        def decoratorFunction(cls):
-            # Creating synthesization data if it does not exist.
-            self._makeSyntheticDataIfNotExists(cls)
-            
+        def decoratorFunction(cls):            
             # Inserting this member at the beginning of the member list of synthesization data attribute
             # because decorators are called in reversed order.
-            cls.__syntheticMetaData__.insertSyntheticMemberAtBegin(syntheticMember)
+            self._syntheticMetaData(cls).insertSyntheticMemberAtBegin(syntheticMember)
             
-            self._overrideConstructor(cls)
-            self._makeGetter(cls, namingConvention, syntheticMember)
-            self._makeSetter(cls, namingConvention, syntheticMember)
+            self._updateClass(cls)
             return cls
         return decoratorFunction
 
     def syntheticConstructorDecorator(self):
-        def decoratorFunction(cls):
-            # Creating synthesization data if it does not exist.
-            self._makeSyntheticDataIfNotExists(cls)
-            
+        def functionWrapper(cls):            
             # This will be used later to tell the new constructor to consume parameters to initialize members.
-            cls.__syntheticMetaData__.setConsumeArguments(True)
+            self._syntheticMetaData(cls).setConsumeArguments(True)
             
-            self._overrideConstructor(cls)
+            self._updateClass(cls)
+            return cls
+        return functionWrapper
+    
+    def namingConventionDecorator(self, namingConvention):
+        """
+    :type namingConvention:INamingConvention
+"""
+        def decoratorFunction(cls):
+            # Remove getters and setters with old naming convention.
+            self._clearGettersAndSetters(cls)
+            
+            # Set new naming convention.
+            self._syntheticMetaData(cls).setNamingConvention(namingConvention)
+            
+            # Update constructor and recreate getters and setters.
+            self._updateClass(cls)
             return cls
         return decoratorFunction
 
-    def _makeSyntheticDataIfNotExists(self, cls):
-        # SyntheticMetaData already exists.
-        if hasattr(cls, '__syntheticMetaData__'):
-            return
-        
-        # Othewise, we create it.
-        originalConstructor = getattr(cls, '__init__', None)
-        cls.__syntheticMetaData__ = SyntheticMetaData(originalConstructor = originalConstructor)
+    def _syntheticMetaData(self, cls):
+        # SyntheticMetaData does not exist...
+        syntheticMetaDataName = '__syntheticMetaData__'
+        if not hasattr(cls, syntheticMetaDataName):
+            # ...we create it.
+            originalConstructor = getattr(cls, '__init__', None)
+            syntheticMetaData = SyntheticMetaData(originalConstructor = originalConstructor,
+                                                  namingConvention = NamingConventionCamelCase())
+            setattr(cls, syntheticMetaDataName, syntheticMetaData)
+        return getattr(cls, syntheticMetaDataName)
+
+    def _updateClass(self, cls):
+        """We overwrite constructor, getters and setters every time because the constructor might have to consume all
+members even if their decorator is below the "synthesizeConstructor" decorator and it also might need to update
+the getters and setters because the naming convention has changed.
+"""
+        self._overrideConstructor(cls)
+        for syntheticMember in self._syntheticMetaData(cls).syntheticMemberList():
+            self._makeGetter(cls, syntheticMember)
+            self._makeSetter(cls, syntheticMember)
 
     def _overrideConstructor(self, cls):
         # Retrieving synthesized member list and original init method.
-        originalConstructor = cls.__syntheticMetaData__.originalConstructor()
-        syntheticMemberList = cls.__syntheticMetaData__.syntheticMemberList()
-        doesConsumeArguments = cls.__syntheticMetaData__.doesConsumeArguments()
+        syntheticMetaData = self._syntheticMetaData(cls)
+        originalConstructor = syntheticMetaData.originalConstructor()
+        syntheticMemberList = syntheticMetaData.syntheticMemberList()
+        doesConsumeArguments = syntheticMetaData.doesConsumeArguments()
         
         def init(instance, *args, **kwargs):
             # Original constructor's expected args.
@@ -241,28 +260,33 @@ If original constructor accepts keyworded args, all keyworded args are forwarded
         positionalArgumentTuple = tuple([value for _, value in positionalArgumentKeyValueList])
         return positionalArgumentTuple, keywordedArgDict
 
-    def _makeGetter(self, cls, namingConvention, syntheticMember):
+    def _clearGettersAndSetters(self, cls):
+        for syntheticMember in self._syntheticMetaData(cls).syntheticMemberList():
+            delattr(cls, self._getterName(cls, syntheticMember))
+            delattr(cls, self._setterName(cls, syntheticMember))
+
+    def _makeGetter(self, cls, syntheticMember):
         def getter(instance):
             return getattr(instance, syntheticMember.privateMemberName())
-        setattr(cls, self._getterName(namingConvention, syntheticMember), getter)
+        setattr(cls, self._getterName(cls, syntheticMember), getter)
     
-    def _makeSetter(self, cls, namingConvention, syntheticMember):
+    def _makeSetter(self, cls, syntheticMember):
         # No setter if read only member.
         if syntheticMember.isReadOnly():
             return
         
         def setter(instance, value):
             setattr(instance, syntheticMember.privateMemberName(), value)
-        setattr(cls, self._setterName(namingConvention, syntheticMember), setter)
+        setattr(cls, self._setterName(cls, syntheticMember), setter)
 
-    def _getterName(self, namingConvention, syntheticMember):
+    def _getterName(self, cls, syntheticMember):
         getterName = syntheticMember.getterName()
         if getterName is None:
-            getterName = namingConvention.getterName(syntheticMember.memberName())
+            getterName = self._syntheticMetaData(cls).namingConvention().getterName(syntheticMember.memberName())
         return getterName
     
-    def _setterName(self, namingConvention, syntheticMember):
+    def _setterName(self, cls, syntheticMember):
         setterName = syntheticMember.setterName()
         if setterName is None:
-            setterName = namingConvention.setterName(syntheticMember.memberName())
+            setterName = self._syntheticMetaData(cls).namingConvention().setterName(syntheticMember.memberName())
         return setterName

@@ -7,36 +7,40 @@
 # $Id: $
 #
 
-from contracts import contract
-from synthetic.naming_convention_camel_case import NamingConventionCamelCase
+from contracts import contract, new_contract
 from synthetic.i_naming_convention import INamingConvention
 from synthetic.synthetic_decorator_factory import SyntheticDecoratorFactory
+
+new_contract('INamingConvention', INamingConvention)
 
 @contract
 def synthesizeMember(memberName,
                defaultValue = None,
                contract = None,
                readOnly = False,
-               namingConvention = NamingConventionCamelCase(),
                getterName = None,
                setterName = None,
                privateMemberName = None):
     """
-        :type memberName: str
-        :type readOnly: bool
-        :type namingConvention: INamingConvention
-        :type getterName: str|None
-        :type setterName: str|None
-        :type privateMemberName: str|None
-    """
+    :type memberName: str
+    :type readOnly: bool
+    :type getterName: str|None
+    :type setterName: str|None
+    :type privateMemberName: str|None
+"""
     return SyntheticDecoratorFactory().syntheticMemberDecorator(memberName,
                                                                 defaultValue,
                                                                 contract,
                                                                 readOnly,
-                                                                namingConvention,
                                                                 getterName,
                                                                 setterName,
                                                                 privateMemberName)
 
 def synthesizeConstructor():
     return SyntheticDecoratorFactory().syntheticConstructorDecorator()
+
+def namingConvention(namingConvention):
+    """
+    :type namingConvention: INamingConvention
+"""
+    return SyntheticDecoratorFactory().namingConventionDecorator(namingConvention)
