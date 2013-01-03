@@ -4,7 +4,7 @@
 #
 # @author: Younes JAAIDI
 #
-# $Id: $
+# $Id$
 #
 from contracts import contract, new_contract
 from synthetic.i_naming_convention import INamingConvention
@@ -14,17 +14,22 @@ new_contract('SyntheticMember', SyntheticMember)
 new_contract('INamingConvetion', INamingConvention)
 
 class SyntheticMetaData:
-    def __init__(self, originalConstructor, namingConvention):
+    def __init__(self, originalConstructor, originalMethodNameList, namingConvention):
         """
+    :type originalMethodNameList: list(str)
     :type namingConvention: INamingConvention
 """
         self._originalConstructor = originalConstructor
+        self._originalMethodNameList = originalMethodNameList
         self._syntheticMemberList = []
         self._doesConsumeArguments = False
         self._namingConvention = namingConvention
     
     def originalConstructor(self):
         return self._originalConstructor
+
+    def originalMethodNameList(self):
+        return self._originalMethodNameList
 
     @contract
     def insertSyntheticMemberAtBegin(self, synthesizedMember):
