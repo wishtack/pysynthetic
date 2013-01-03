@@ -4,7 +4,7 @@
 #
 # @author: Younes JAAIDI
 #
-# $Id: $
+# $Id$
 #
 
 from contracts import contract, new_contract
@@ -36,15 +36,15 @@ class SyntheticDecoratorFactory:
     :type setterName: str|None
     :type privateMemberName: str|None
 """
-        syntheticMember = SyntheticMember(memberName,
-                                          defaultValue,
-                                          contract,
-                                          readOnly,
-                                          getterName,
-                                          setterName,
-                                          privateMemberName)
+        def decoratorFunction(cls):
+            syntheticMember = SyntheticMember(memberName,
+                                              defaultValue,
+                                              contract,
+                                              readOnly,
+                                              getterName,
+                                              setterName,
+                                              privateMemberName)
         
-        def decoratorFunction(cls):            
             # Inserting this member at the beginning of the member list of synthesization data attribute
             # because decorators are called in reversed order.
             self._syntheticMetaData(cls).insertSyntheticMemberAtBegin(syntheticMember)
@@ -68,7 +68,7 @@ class SyntheticDecoratorFactory:
 """
         def decoratorFunction(cls):
             # Remove getters and setters with old naming convention.
-            self._clearGettersAndSetters(cls)
+            self._removeAccessorForMemberAll(cls)
             
             # Set new naming convention.
             self._syntheticMetaData(cls).setNamingConvention(namingConvention)
@@ -84,7 +84,15 @@ class SyntheticDecoratorFactory:
         if not hasattr(cls, syntheticMetaDataName):
             # ...we create it.
             originalConstructor = getattr(cls, '__init__', None)
+            
+            # List of existing methods (Python2: ismethod, Python3: isfunction).
+            originalMethodList = inspect.getmembers(cls,
+                                                    predicate = lambda m: inspect.ismethod(m) or inspect.isfunction(m))
+            originalMethodNameList = [method[0] for method in originalMethodList]
+            
+            # Making the synthetic meta data.
             syntheticMetaData = SyntheticMetaData(originalConstructor = originalConstructor,
+                                                  originalMethodNameList = originalMethodNameList,
                                                   namingConvention = NamingConventionCamelCase())
             setattr(cls, syntheticMetaDataName, syntheticMetaData)
         return getattr(cls, syntheticMetaDataName)
@@ -260,15 +268,16 @@ If original constructor accepts keyworded args, all keyworded args are forwarded
         positionalArgumentTuple = tuple([value for _, value in positionalArgumentKeyValueList])
         return positionalArgumentTuple, keywordedArgDict
 
-    def _clearGettersAndSetters(self, cls):
+    def _removeAccessorForMemberAll(self, cls):
         for syntheticMember in self._syntheticMetaData(cls).syntheticMemberList():
-            delattr(cls, self._getterName(cls, syntheticMember))
-            delattr(cls, self._setterName(cls, syntheticMember))
+            self._removeAccessor(cls, self._getterName(cls, syntheticMember))
+            self._removeAccessor(cls, self._setterName(cls, syntheticMember))
 
     def _makeGetter(self, cls, syntheticMember):
         def getter(instance):
             return getattr(instance, syntheticMember.privateMemberName())
-        setattr(cls, self._getterName(cls, syntheticMember), getter)
+
+        self._addAccessor(cls, self._getterName(cls, syntheticMember), getter)
     
     def _makeSetter(self, cls, syntheticMember):
         # No setter if read only member.
@@ -277,7 +286,20 @@ If original constructor accepts keyworded args, all keyworded args are forwarded
         
         def setter(instance, value):
             setattr(instance, syntheticMember.privateMemberName(), value)
-        setattr(cls, self._setterName(cls, syntheticMember), setter)
+
+        self._addAccessor(cls, self._setterName(cls, syntheticMember), setter)
+
+    def _addAccessor(self, cls, accessorName, accessor):
+        # Don't synthesize accessor if it is overriden by the user.
+        if accessorName in self._syntheticMetaData(cls).originalMethodNameList():
+            return
+        setattr(cls, accessorName, accessor)
+    
+    def _removeAccessor(self, cls, accessorName):
+        # Don't remove accessor if it is overriden by the user.
+        if accessorName in self._syntheticMetaData(cls).originalMethodNameList():
+            return  
+        delattr(cls, accessorName)
 
     def _getterName(self, cls, syntheticMember):
         getterName = syntheticMember.getterName()
