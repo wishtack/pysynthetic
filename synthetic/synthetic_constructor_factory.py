@@ -21,24 +21,26 @@ class SyntheticConstructorFactory:
     :type syntheticMemberList: list(SyntheticMember)
     :type doesConsumeArguments: bool
 """
+
+        # Original constructor's expected args.
+        originalConstructorExpectedArgList = []
+        doesExpectVariadicArgs = False
+        doesExpectKeywordedArgs = False
+        
+        if inspect.isfunction(originalConstructor) or inspect.ismethod(originalConstructor):
+            argSpec = inspect.getargspec(originalConstructor)
+            # originalConstructorExpectedArgList = expected args - self.
+            originalConstructorExpectedArgList = argSpec.args[1:]
+            doesExpectVariadicArgs = (argSpec.varargs is not None)
+            doesExpectKeywordedArgs = (argSpec.keywords is not None)
         
         def init(instance, *args, **kwargs):
-            # Original constructor's expected args.
-            originalConstructorExpectedArgList = []
-            doesExpectVariadicArgs = False
-            doesExpectKeywordedArgs = False
-            
-            if inspect.isfunction(originalConstructor) or inspect.ismethod(originalConstructor):
-                argSpec = inspect.getargspec(originalConstructor)
-                # originalConstructorExpectedArgList = expected args - self.
-                originalConstructorExpectedArgList = argSpec.args[1:]
-                doesExpectVariadicArgs = (argSpec.varargs is not None)
-                doesExpectKeywordedArgs = (argSpec.keywords is not None)
-                   
-            # Merge original constructor's args specification with member list and make an args dict.
-            positionalArgumentKeyValueList = self._positionalArgumentKeyValueList(originalConstructorExpectedArgList,
-                                                                                syntheticMemberList,
-                                                                                args)
+
+            if doesConsumeArguments:
+                # Merge original constructor's args specification with member list and make an args dict.
+                positionalArgumentKeyValueList = self._positionalArgumentKeyValueList(originalConstructorExpectedArgList,
+                                                                                    syntheticMemberList,
+                                                                                    args)
 
             # Set members values.
             for syntheticMember in syntheticMemberList:
@@ -59,13 +61,14 @@ class SyntheticConstructorFactory:
                         syntheticMember.privateMemberName(),
                         value)
 
-            # Remove superfluous arguments that have been used for synthesization but are not expected by constructor.
-            args, kwargs = self._filterArgsAndKwargs(originalConstructorExpectedArgList,
-                                                     doesExpectVariadicArgs,
-                                                     doesExpectKeywordedArgs,
-                                                     syntheticMemberList,
-                                                     positionalArgumentKeyValueList,
-                                                     kwargs)
+            if doesConsumeArguments:
+                # Remove superfluous arguments that have been used for synthesization but are not expected by constructor.
+                args, kwargs = self._filterArgsAndKwargs(originalConstructorExpectedArgList,
+                                                         doesExpectVariadicArgs,
+                                                         doesExpectKeywordedArgs,
+                                                         syntheticMemberList,
+                                                         positionalArgumentKeyValueList,
+                                                         kwargs)
             # Call original constructor.
             if originalConstructor is not None:
                 originalConstructor(instance, *args, **kwargs)
