@@ -1,9 +1,11 @@
-#Tue Dec 18 11:42:17 CET 2012
+#Thu Jan 03 15:08:15 CET 2013
 eclipse.preferences.version=1
 encoding//synthetic/decorators.py=utf-8
 encoding//synthetic/i_naming_convention.py=utf-8
 encoding//synthetic/naming_convention_camel_case.py=utf-8
 encoding//synthetic/naming_convention_underscore.py=utf-8
+encoding//synthetic/synthetic_class_controller.py=utf-8
+encoding//synthetic/synthetic_constructor_factory.py=utf-8
 encoding//synthetic/synthetic_decorator_factory.py=utf-8
 encoding//synthetic/synthetic_member.py=utf-8
 encoding//synthetic/synthetic_meta_data.py=utf-8

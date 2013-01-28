@@ -58,3 +58,19 @@ class SyntheticMember:
 
     def privateMemberName(self):
         return self._privateMemberName
+
+    def getter(self):
+        def getter(instance):
+            return getattr(instance, self.privateMemberName())
+
+        return getter
+    
+    def setter(self):
+        # No setter if read only member.
+        if self.isReadOnly():
+            return None
+        
+        def setter(instance, value):
+            setattr(instance, self.privateMemberName(), value)
+
+        return setter
