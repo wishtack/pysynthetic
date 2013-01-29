@@ -4,7 +4,7 @@
 #
 # @author: Younes JAAIDI
 #
-# $Id: $
+# $Id$
 #
 from contracts import contract, new_contract
 from synthetic.synthetic_member import SyntheticMember
