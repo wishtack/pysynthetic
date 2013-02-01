@@ -7,15 +7,15 @@
 # $Id$
 #
 
-import unittest
-
+from contracts import ContractNotRespected
 from synthetic import synthesizeMember, namingConvention, NamingConventionUnderscore
+import unittest
 
 @synthesizeMember('minimalistMember')
 @synthesizeMember('memberWithDefaultValue', defaultValue = "default")
 @synthesizeMember('customMember',
             getterName = 'giveMeTheCustomMember',
-            setterName = 'giveThisToTheCustumMember',
+            setterName = 'giveThisToTheCustomMember',
             privateMemberName = '_internalPrivateSecretMemberThatShouldNeverBeUsedOutsideThisClass')
 class TestBasic:
     pass
@@ -30,6 +30,11 @@ class TestUnderscore:
 
 @synthesizeMember('readOnlyMember', readOnly = True)
 class TestReadOnly:
+    pass
+
+@synthesizeMember('memberString', contract = str)
+@synthesizeMember('memberStringList', contract = 'list(str)')
+class TestContract:
     pass
 
 @synthesizeMember('member_with_custom_getter_setter')
@@ -70,7 +75,7 @@ class TestSynthesizeMember(unittest.TestCase):
         self.assertFalse(hasattr(instance, '_customMember'))
 
         # ... but custom names work.
-        instance.giveThisToTheCustumMember("newValue")
+        instance.giveThisToTheCustomMember("newValue")
         self.assertEqual("newValue", instance._internalPrivateSecretMemberThatShouldNeverBeUsedOutsideThisClass)
         self.assertEqual("newValue", instance.giveMeTheCustomMember())
     
@@ -102,7 +107,15 @@ class TestSynthesizeMember(unittest.TestCase):
         self.assertFalse(hasattr(instance, 'set_fourth_member'))
         
     def testContract(self):
-        pass
+        instance = TestContract()
+        
+        # OK.
+        instance.setMemberString("I love CamelCase!!!")
+        instance.setMemberStringList(["a", "b"])
+        
+        # Not OK.
+        self.assertRaises(ContractNotRespected, instance.setMemberString, 10)
+        self.assertRaises(ContractNotRespected, instance.setMemberStringList, ["a", 2])
     
     def testReadOnly(self):
         instance = TestReadOnly()
@@ -138,6 +151,3 @@ We also check that there's no bug if the naming convention is changed.
         self.assertEqual('member_with_custom_getter_setter_value', instance.member_with_custom_getter_setter())
         self.assertEqual('value', instance.member_with_custom_setter())
         self.assertEqual('member_with_custom_getter_value', instance.member_with_custom_getter())
-
-if __name__ == "__main__":
-    unittest.main()

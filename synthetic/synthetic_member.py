@@ -7,7 +7,7 @@
 # $Id$
 #
 
-from contracts import contract
+from contracts import contract, parse
 
 class SyntheticMember:
     @contract
@@ -29,6 +29,9 @@ class SyntheticMember:
 
         if privateMemberName is None:
             privateMemberName = '_%s' % memberName
+
+        if contract is not None:
+            contract = parse(contract)
             
         self._memberName = memberName
         self._defaultValue = defaultValue
@@ -71,6 +74,12 @@ class SyntheticMember:
             return None
         
         def setter(instance, value):
+            if self._contract is not None:
+                self.checkContract(value)
             setattr(instance, self.privateMemberName(), value)
 
         return setter
+
+    def checkContract(self, value):
+        if self._contract is not None:
+            self._contract.check_contract(value = value, context = {})
