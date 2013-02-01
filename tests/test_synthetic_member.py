@@ -123,7 +123,7 @@ class TestSynthesizeMember(unittest.TestCase):
         except ContractNotRespected as e:
             self.assertEqual("""\
 Expected type 'str', got 'int'.
-checking: str      for value: Instance of int: 10   """, str(e))
+checking: str   (memberString: Instance of int: 10)   for value: Instance of int: 10   """, str(e))
 
     
     def testReadOnly(self):
