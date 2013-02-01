@@ -82,4 +82,4 @@ class SyntheticMember:
 
     def checkContract(self, value):
         if self._contract is not None:
-            self._contract.check_contract(value = value, context = {})
+            self._contract._check_contract(value = value, context = {})
