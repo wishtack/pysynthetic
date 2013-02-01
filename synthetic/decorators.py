@@ -4,12 +4,12 @@
 #
 # @author: Younes JAAIDI
 #
-# $Id: $
+# $Id$
 #
 
 from contracts import contract, new_contract
-from synthetic.i_naming_convention import INamingConvention
-from synthetic.synthetic_decorator_factory import SyntheticDecoratorFactory
+from .i_naming_convention import INamingConvention
+from .synthetic_decorator_factory import SyntheticDecoratorFactory
 
 new_contract('INamingConvention', INamingConvention)
 

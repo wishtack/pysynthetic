@@ -8,9 +8,9 @@
 #
 
 from contracts import contract, new_contract
-from synthetic.i_naming_convention import INamingConvention
-from synthetic.synthetic_class_controller import SyntheticClassController
-from synthetic.synthetic_member import SyntheticMember
+from .i_naming_convention import INamingConvention
+from .synthetic_class_controller import SyntheticClassController
+from .synthetic_member import SyntheticMember
 
 new_contract('INamingConvention', INamingConvention)
 new_contract('SyntheticMember', SyntheticMember)
