@@ -255,3 +255,11 @@ class TestSynthesizeConstructor(unittest.TestCase):
 
         # Invalid memberStringList.
         self.assertRaises(ContractNotRespected, TestContract, memberString = "test", memberStringList = ["a", 2])
+
+        # Checking exception message.
+        try:
+            TestContract()
+        except ContractNotRespected as e:
+            self.assertEqual("""\
+Expected type 'str', got 'NoneType'.
+checking: str      for value: Instance of NoneType: None   """, str(e))
