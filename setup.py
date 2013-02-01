@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from synthetic import __version__
 from setuptools import setup, find_packages
 import sys
 
@@ -12,10 +13,9 @@ install_requires = ['pycontracts >= 1.4.0',
                     'pyparsing == 1.5.6']
 
 setup(
-    name="pysynthetic",
-    version="0.3",
-    platforms=['any'],
-    packages=find_packages(exclude=['tests', 'tests.*']),
-    install_requires=install_requires,
-    zip_safe=True)
-
+    name = "pysynthetic",
+    version = __version__,
+    platforms = ['any'],
+    packages = find_packages(exclude = ['tests', 'tests.*']),
+    install_requires = install_requires,
+    zip_safe = True)
