@@ -116,6 +116,15 @@ class TestSynthesizeMember(unittest.TestCase):
         # Not OK.
         self.assertRaises(ContractNotRespected, instance.setMemberString, 10)
         self.assertRaises(ContractNotRespected, instance.setMemberStringList, ["a", 2])
+
+        # Checking exception message.
+        try:
+            instance.setMemberString(10)
+        except ContractNotRespected as e:
+            self.assertEqual("""\
+Expected type 'str', got 'int'.
+checking: str      for value: Instance of int: 10   """, str(e))
+
     
     def testReadOnly(self):
         instance = TestReadOnly()
