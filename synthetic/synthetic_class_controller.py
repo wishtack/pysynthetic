@@ -4,15 +4,15 @@
 #
 # @author: Younes JAAIDI
 #
-# $Id: $
+# $Id$
 #
 from contracts import new_contract, contract
-from synthetic.i_naming_convention import INamingConvention
-from synthetic.naming_convention_camel_case import NamingConventionCamelCase
-from synthetic.synthetic_member import SyntheticMember
-from synthetic.synthetic_meta_data import SyntheticMetaData
+from .i_naming_convention import INamingConvention
+from .naming_convention_camel_case import NamingConventionCamelCase
+from .synthetic_member import SyntheticMember
+from .synthetic_meta_data import SyntheticMetaData
 import inspect
-from synthetic.synthetic_constructor_factory import SyntheticConstructorFactory
+from .synthetic_constructor_factory import SyntheticConstructorFactory
 
 new_contract('INamingConvention', INamingConvention)
 new_contract('SyntheticMember', SyntheticMember)
