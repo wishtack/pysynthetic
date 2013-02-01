@@ -13,7 +13,7 @@ install_requires = ['pycontracts >= 1.4.0',
 
 setup(
     name="pysynthetic",
-    version="0.1",
+    version="0.3",
     platforms=['any'],
     packages=find_packages(exclude=['tests', 'tests.*']),
     install_requires=install_requires,
