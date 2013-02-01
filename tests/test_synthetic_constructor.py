@@ -7,9 +7,9 @@
 # $Id$
 #
 
-import unittest
-
+from contracts import ContractNotRespected
 from synthetic import synthesizeMember, synthesizeConstructor
+import unittest
 
 @synthesizeMember('minimalistMember')
 @synthesizeMember('memberWithDefaultValue', defaultValue = "default")
@@ -37,6 +37,12 @@ class TestIntermediate(TestBase):
 @synthesizeMember('childMember')
 @synthesizeConstructor()
 class TestChild(TestIntermediate):
+    pass
+
+@synthesizeMember('memberString', contract = str)
+@synthesizeMember('memberStringList', contract = 'list(str)')
+@synthesizeConstructor()
+class TestContract:
     pass
 
 @synthesizeMember('implicitMember')
@@ -235,3 +241,17 @@ class TestSynthesizeConstructor(unittest.TestCase):
         self.assertEqual(1, instance.a())
         self.assertEqual(2, instance.b())
         self.assertEqual(10, instance.c())
+
+    def testSynthesizeConstructorWithContract(self):
+        # OK.
+        TestContract(memberString = "Be free! Kill bureaucracy!!!",
+                     memberStringList = ["a", "b"])
+
+        # memberString and memberStringList can't be None.
+        self.assertRaises(ContractNotRespected, TestContract)
+        
+        # Invalid memberString.
+        self.assertRaises(ContractNotRespected, TestContract, memberString = 1234, memberStringList = ["a", "b"])
+
+        # Invalid memberStringList.
+        self.assertRaises(ContractNotRespected, TestContract, memberString = "test", memberStringList = ["a", 2])

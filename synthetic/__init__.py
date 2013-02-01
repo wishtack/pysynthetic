@@ -1,4 +1,4 @@
 
-from synthetic.naming_convention_camel_case import NamingConventionCamelCase
-from synthetic.naming_convention_underscore import NamingConventionUnderscore
-from synthetic.decorators import synthesizeMember, synthesizeConstructor, namingConvention
+from .naming_convention_camel_case import NamingConventionCamelCase
+from .naming_convention_underscore import NamingConventionUnderscore
+from .decorators import synthesizeMember, synthesizeConstructor, namingConvention

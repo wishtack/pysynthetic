@@ -6,8 +6,8 @@
 #
 # $Id$
 #
-from contracts import contract, new_contract
-from synthetic.synthetic_member import SyntheticMember
+from contracts import check, contract, new_contract
+from .synthetic_member import SyntheticMember
 import copy
 import inspect
 
@@ -55,6 +55,9 @@ class SyntheticConstructorFactory:
                                                   positionalArgumentKeyValueList,
                                                   kwargs,
                                                   value)
+
+                    # Checking that the contract is respected.
+                    syntheticMember.checkContract(value)
 
                 # Initalizing member with a value.
                 setattr(instance,
