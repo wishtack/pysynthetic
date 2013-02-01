@@ -57,7 +57,7 @@ class SyntheticConstructorFactory:
                                                   value)
 
                     # Checking that the contract is respected.
-                    syntheticMember.checkContract(value)
+                    syntheticMember.checkContract(memberName, value)
 
                 # Initalizing member with a value.
                 setattr(instance,
