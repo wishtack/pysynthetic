@@ -75,11 +75,11 @@ class SyntheticMember:
         
         def setter(instance, value):
             if self._contract is not None:
-                self.checkContract(value)
+                self.checkContract(self._memberName, value)
             setattr(instance, self.privateMemberName(), value)
 
         return setter
 
-    def checkContract(self, value):
+    def checkContract(self, argumentName, value):
         if self._contract is not None:
-            self._contract._check_contract(value = value, context = {})
+            self._contract._check_contract(value = value, context = {argumentName: value})
