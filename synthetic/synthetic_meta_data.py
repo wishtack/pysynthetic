@@ -7,8 +7,8 @@
 # $Id$
 #
 from contracts import contract, new_contract
-from synthetic.i_naming_convention import INamingConvention
-from synthetic.synthetic_member import SyntheticMember
+from .i_naming_convention import INamingConvention
+from .synthetic_member import SyntheticMember
 
 new_contract('SyntheticMember', SyntheticMember)
 new_contract('INamingConvetion', INamingConvention)
