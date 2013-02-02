@@ -8,7 +8,8 @@
 #
 
 from contracts import ContractNotRespected
-from synthetic import synthesizeMember, synthesizeConstructor
+from synthetic import synthesizeMember, synthesizeConstructor, synthesize_constructor
+import contracts
 import unittest
 
 @synthesizeMember('minimalistMember')
@@ -18,7 +19,7 @@ class TestConstructor:
     pass
 
 @synthesizeMember('minimalistMember')
-@synthesizeConstructor()
+@synthesize_constructor()
 @synthesizeMember('memberWithDefaultValue', defaultValue = "default")
 class TestConstructorRandomDecoratorPosition:
     pass
@@ -68,7 +69,10 @@ class TestVariadicAndKewordedConstructor:
 
 class TestSynthesizeConstructor(unittest.TestCase):
 
-    def testSynthesizeConstructor(self):
+    def setUp(self):
+        contracts.enable_all()
+
+    def testOK(self):
         
         for cls in [TestConstructor, TestConstructorRandomDecoratorPosition]:
             
@@ -92,7 +96,7 @@ class TestSynthesizeConstructor(unittest.TestCase):
             self.assertEqual(None, instance.minimalistMember())
             self.assertEqual(2, instance.memberWithDefaultValue())
     
-    def testSynthesizeConstructorWithInheritance(self):
+    def testInheritance(self):
         instance = TestChild(1, 2, 3)
         self.assertEqual(1, instance.childMember())
         self.assertEqual(2, instance.intermediateMember())
@@ -108,7 +112,7 @@ class TestSynthesizeConstructor(unittest.TestCase):
         self.assertEqual(None, instance.intermediateMember())
         self.assertEqual(3, instance.baseMember())
 
-    def testSynthesizeConstructorWithCustomConstructor(self):
+    def testCustomConstructor(self):
         # TestCustomConstructor __init__ method takes 3 parameters (minimalistMember, overridenMember and extraMember) + self.
         self.assertRaises(TypeError, TestCustomConstructor)
         self.assertRaises(TypeError, TestCustomConstructor, "minimalist")
@@ -233,7 +237,7 @@ class TestSynthesizeConstructor(unittest.TestCase):
                           "extra",
                           superfluousMember = "superfluous")
 
-    def testSynthesizeConstructorWithVariadicAndKeywordedArguments(self):
+    def testVariadicAndKeywordedArguments(self):
         instance = TestVariadicAndKewordedConstructor(1, 2, 3, 4, 5, c = 10, d = 11, e = 12)
         self.assertEqual(1, instance._aArgument)
         self.assertEqual((2, 3, 4, 5), instance._args)
@@ -242,7 +246,7 @@ class TestSynthesizeConstructor(unittest.TestCase):
         self.assertEqual(2, instance.b())
         self.assertEqual(10, instance.c())
 
-    def testSynthesizeConstructorWithContract(self):
+    def testContract(self):
         # OK.
         TestContract(memberString = "Be free! Kill bureaucracy!!!",
                      memberStringList = ["a", "b"])
@@ -263,3 +267,12 @@ class TestSynthesizeConstructor(unittest.TestCase):
             self.assertEqual("""\
 Expected type 'str', got 'NoneType'.
 checking: str   (memberString: Instance of NoneType: None)   for value: Instance of NoneType: None   """, str(e))
+
+    def testContractDisabled(self):
+        # Disabling contracts.
+        contracts.disable_all()
+        
+        # No exception is raised.
+        TestContract()
+        TestContract(memberString = 1234, memberStringList = ["a", "b"])
+        TestContract(memberString = "test", memberStringList = ["a", 2])

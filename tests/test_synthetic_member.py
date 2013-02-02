@@ -8,11 +8,14 @@
 #
 
 from contracts import ContractNotRespected
-from synthetic import synthesizeMember, namingConvention, NamingConventionUnderscore
+from synthetic import synthesizeMember, synthesize_member, namingConvention, naming_convention, \
+                      NamingConventionCamelCase, NamingConventionUnderscore
+import contracts
 import unittest
 
 @synthesizeMember('minimalistMember')
 @synthesizeMember('memberWithDefaultValue', defaultValue = "default")
+@synthesize_member('underscore_member')
 @synthesizeMember('customMember',
             getterName = 'giveMeTheCustomMember',
             setterName = 'giveThisToTheCustomMember',
@@ -25,9 +28,13 @@ class TestBasic:
 @synthesizeMember('second_member')
 @synthesizeMember('third_member', getterName = 'third_member_custom_getter')
 @synthesizeMember('fourth_member', setterName = 'fourth_member_custom_setter')
-class TestUnderscore:
+class TestNamingConventionOverrideUnderscore:
     pass
 
+# By the way, we try the 'naming_convention' decorator.
+# This will test that when naming convetion decorator will try to recreate accessors,
+# it will not try to remove the setter as the member is 'read only'.
+@naming_convention(NamingConventionCamelCase())
 @synthesizeMember('readOnlyMember', readOnly = True)
 class TestReadOnly:
     pass
@@ -56,7 +63,10 @@ class TestCustomAccessors:
 
 class TestSynthesizeMember(unittest.TestCase):
 
-    def testSynthesizeMember(self):
+    def setUp(self):
+        contracts.enable_all()
+
+    def testOK(self):
         instance = TestBasic()
         
         # Default default ;) member value is None.
@@ -78,9 +88,14 @@ class TestSynthesizeMember(unittest.TestCase):
         instance.giveThisToTheCustomMember("newValue")
         self.assertEqual("newValue", instance._internalPrivateSecretMemberThatShouldNeverBeUsedOutsideThisClass)
         self.assertEqual("newValue", instance.giveMeTheCustomMember())
+        
+        # Underscore member.
+        instance.set_underscore_member("_u_n_d_e_r_s_c_o_r_e_")
+        self.assertEqual("_u_n_d_e_r_s_c_o_r_e_", instance._underscore_member)
+        self.assertEqual("_u_n_d_e_r_s_c_o_r_e_", instance.underscore_member())
     
-    def testSynthesizeWithNamingConventionUnderscore(self):
-        instance = TestUnderscore()
+    def testNamingConventionUnderscore(self):
+        instance = TestNamingConventionOverrideUnderscore()
         
         # Default default ;) member value is None.
         self.assertEqual(None, instance.first_member())
@@ -105,26 +120,6 @@ class TestSynthesizeMember(unittest.TestCase):
         self.assertFalse(hasattr(instance, 'setFourth_member'))
         self.assertFalse(hasattr(instance, 'third_member'))
         self.assertFalse(hasattr(instance, 'set_fourth_member'))
-        
-    def testContract(self):
-        instance = TestContract()
-        
-        # OK.
-        instance.setMemberString("I love CamelCase!!!")
-        instance.setMemberStringList(["a", "b"])
-        
-        # Not OK.
-        self.assertRaises(ContractNotRespected, instance.setMemberString, 10)
-        self.assertRaises(ContractNotRespected, instance.setMemberStringList, ["a", 2])
-
-        # Checking exception message.
-        try:
-            instance.setMemberString(10)
-        except ContractNotRespected as e:
-            self.assertEqual("""\
-Expected type 'str', got 'int'.
-checking: str   (memberString: Instance of int: 10)   for value: Instance of int: 10   """, str(e))
-
     
     def testReadOnly(self):
         instance = TestReadOnly()
@@ -160,3 +155,31 @@ We also check that there's no bug if the naming convention is changed.
         self.assertEqual('member_with_custom_getter_setter_value', instance.member_with_custom_getter_setter())
         self.assertEqual('value', instance.member_with_custom_setter())
         self.assertEqual('member_with_custom_getter_value', instance.member_with_custom_getter())
+
+    def testContract(self):
+        instance = TestContract()
+        
+        # OK.
+        instance.setMemberString("I love CamelCase!!!")
+        instance.setMemberStringList(["a", "b"])
+        
+        # Not OK.
+        self.assertRaises(ContractNotRespected, instance.setMemberString, 10)
+        self.assertRaises(ContractNotRespected, instance.setMemberStringList, ["a", 2])
+
+        # Checking exception message.
+        try:
+            instance.setMemberString(10)
+        except ContractNotRespected as e:
+            self.assertEqual("""\
+Expected type 'str', got 'int'.
+checking: str   (memberString: Instance of int: 10)   for value: Instance of int: 10   """, str(e))
+
+    def testContractDisabled(self):
+        instance = TestContract()
+
+        contracts.disable_all()
+
+        # No exception is raised
+        instance.setMemberString(10)
+        instance.setMemberStringList(["a", 2])
