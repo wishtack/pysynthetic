@@ -6,13 +6,13 @@
 #
 # $Id$
 #
-from contracts import new_contract, contract
+
 from .i_naming_convention import INamingConvention
-from .naming_convention_camel_case import NamingConventionCamelCase
+from .synthetic_constructor_factory import SyntheticConstructorFactory
 from .synthetic_member import SyntheticMember
 from .synthetic_meta_data import SyntheticMetaData
+from contracts import contract, new_contract
 import inspect
-from .synthetic_constructor_factory import SyntheticConstructorFactory
 
 new_contract('INamingConvention', INamingConvention)
 new_contract('SyntheticMember', SyntheticMember)
@@ -86,34 +86,31 @@ the getters and setters because the naming convention has changed.
         self._makeAccessorForEveryMember()
 
     def _makeAccessorForEveryMember(self):
+        for accessorName, accessor in self._accessorIterable():
+            self._tryToSetAccessor(accessorName, accessor)
+
+    def _removeAccessorForEveryMember(self):
+        for accessorName, _ in self._accessorIterable():
+            self._removeAccessor(accessorName)
+    
+    def _accessorIterable(self):
         syntheticMetaData = self._syntheticMetaData()
         classNamingConvention = syntheticMetaData.namingConvention()
         for syntheticMember in syntheticMetaData.syntheticMemberList():
-            getterName = syntheticMember.getterName(classNamingConvention)
-            setterName = syntheticMember.setterName(classNamingConvention)
-            
-            self._tryToSetAccessor(getterName, syntheticMember.getter())
-            self._tryToSetAccessor(setterName, syntheticMember.setter())
+            accessorDict = syntheticMember.accessorDict(classNamingConvention)
+            for accessorName, accessor in accessorDict.items():
+                yield accessorName, accessor
 
+    @contract
     def _tryToSetAccessor(self, accessorName, accessor):
-        # 'accessor' might be None if the member is readonly.
-        if accessor is None:
-            return
-        
+        """
+    :type accessorName: str
+"""
         # Don't synthesize accessor if it is overriden by the user.
         if accessorName in self._syntheticMetaData().originalMethodNameList():
             return
         
         setattr(self._class, accessorName, accessor)
-
-    def _removeAccessorForEveryMember(self):
-        syntheticMetaData = self._syntheticMetaData()
-        classNamingConvention = syntheticMetaData.namingConvention()
-        for syntheticMember in syntheticMetaData.syntheticMemberList():
-            self._removeAccessor(syntheticMember.getterName(classNamingConvention))
-            # Don't try to remove setters if they are not supposed to exist.
-            if not syntheticMember.isReadOnly():
-                self._removeAccessor(syntheticMember.setterName(classNamingConvention))
 
     @contract
     def _removeAccessor(self, accessorName):
@@ -122,5 +119,6 @@ the getters and setters because the naming convention has changed.
 """
         # Don't remove accessor if it is overriden by the user.
         if accessorName in self._syntheticMetaData().originalMethodNameList():
-            return  
+            return
+        
         delattr(self._class, accessorName)
