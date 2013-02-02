@@ -20,6 +20,7 @@ new_contract('SyntheticMember', SyntheticMember)
 class SyntheticClassController:
     
     def __init__(self, cls):
+        self._defaultNamingConvention = NamingConventionCamelCase()
         self._constructorFactory = SyntheticConstructorFactory()
         self._class = cls
     
@@ -66,10 +67,11 @@ class SyntheticClassController:
             originalMethodList = inspect.getmembers(self._class,
                                                     predicate = lambda m: inspect.ismethod(m) or inspect.isfunction(m))
             originalMethodNameList = [method[0] for method in originalMethodList]
-
+            
             # Making the synthetic meta data.
             syntheticMetaData = SyntheticMetaData(originalConstructor = originalConstructor,
-                                                  originalMethodNameList = originalMethodNameList)
+                                                  originalMethodNameList = originalMethodNameList,
+                                                  namingConvention = self._defaultNamingConvention)
             setattr(self._class, syntheticMetaDataName, syntheticMetaData)
         return getattr(self._class, syntheticMetaDataName)
 
@@ -86,14 +88,24 @@ the getters and setters because the naming convention has changed.
         self._makeAccessorForEveryMember()
 
     def _makeAccessorForEveryMember(self):
-        syntheticMetaData = self._syntheticMetaData()
-        classNamingConvention = syntheticMetaData.namingConvention()
-        for syntheticMember in syntheticMetaData.syntheticMemberList():
-            getterName = syntheticMember.getterName(classNamingConvention)
-            setterName = syntheticMember.setterName(classNamingConvention)
+        for syntheticMember in self._syntheticMetaData().syntheticMemberList():
+            getterName = self._getterName(syntheticMember)
+            setterName = self._setterName(syntheticMember)
             
             self._tryToSetAccessor(getterName, syntheticMember.getter())
             self._tryToSetAccessor(setterName, syntheticMember.setter())
+
+    def _getterName(self, syntheticMember):
+        return self._accessorName(syntheticMember, 'getterName')
+    
+    def _setterName(self, syntheticMember):
+        return self._accessorName(syntheticMember, 'setterName')
+
+    def _accessorName(self, syntheticMember, methodName):
+        accessorName = getattr(syntheticMember, methodName)()
+        if accessorName is None:
+            accessorName = getattr(self._syntheticMetaData().namingConvention(), methodName)(syntheticMember.memberName())
+        return accessorName
 
     def _tryToSetAccessor(self, accessorName, accessor):
         # 'accessor' might be None if the member is readonly.
@@ -107,13 +119,9 @@ the getters and setters because the naming convention has changed.
         setattr(self._class, accessorName, accessor)
 
     def _removeAccessorForEveryMember(self):
-        syntheticMetaData = self._syntheticMetaData()
-        classNamingConvention = syntheticMetaData.namingConvention()
-        for syntheticMember in syntheticMetaData.syntheticMemberList():
-            self._removeAccessor(syntheticMember.getterName(classNamingConvention))
-            # Don't try to remove setters if they are not supposed to exist.
-            if not syntheticMember.isReadOnly():
-                self._removeAccessor(syntheticMember.setterName(classNamingConvention))
+        for syntheticMember in self._syntheticMetaData().syntheticMemberList():
+            self._removeAccessor(self._getterName(syntheticMember))
+            self._removeAccessor(self._setterName(syntheticMember))
 
     @contract
     def _removeAccessor(self, accessorName):

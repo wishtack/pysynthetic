@@ -25,15 +25,13 @@ class SyntheticDecoratorFactory:
                                  readOnly,
                                  getterName,
                                  setterName,
-                                 privateMemberName,
-                                 namingConvention):
+                                 privateMemberName):
         """
     :type memberName: str
     :type readOnly: bool
     :type getterName: str|None
     :type setterName: str|None
     :type privateMemberName: str|None
-    :type namingConvention: INamingConvention
 """
         def decoratorFunction(cls):
             syntheticMember = SyntheticMember(memberName,
@@ -42,8 +40,7 @@ class SyntheticDecoratorFactory:
                                               readOnly,
                                               getterName,
                                               setterName,
-                                              privateMemberName,
-                                              namingConvention)
+                                              privateMemberName)
 
             SyntheticClassController(cls).addSyntheticMember(syntheticMember)
 

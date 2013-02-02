@@ -8,7 +8,7 @@
 #
 
 from contracts import ContractNotRespected
-from synthetic import synthesizeMember, synthesizeConstructor, synthesize_constructor
+from synthetic import synthesizeMember, synthesizeConstructor
 import contracts
 import unittest
 
@@ -19,7 +19,7 @@ class TestConstructor:
     pass
 
 @synthesizeMember('minimalistMember')
-@synthesize_constructor()
+@synthesizeConstructor()
 @synthesizeMember('memberWithDefaultValue', defaultValue = "default")
 class TestConstructorRandomDecoratorPosition:
     pass

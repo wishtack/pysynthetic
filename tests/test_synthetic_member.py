@@ -8,14 +8,12 @@
 #
 
 from contracts import ContractNotRespected
-from synthetic import synthesizeMember, synthesize_member, namingConvention, naming_convention, \
-                      NamingConventionCamelCase, NamingConventionUnderscore
+from synthetic import synthesizeMember, namingConvention, NamingConventionUnderscore
 import contracts
 import unittest
 
 @synthesizeMember('minimalistMember')
 @synthesizeMember('memberWithDefaultValue', defaultValue = "default")
-@synthesize_member('underscore_member')
 @synthesizeMember('customMember',
             getterName = 'giveMeTheCustomMember',
             setterName = 'giveThisToTheCustomMember',
@@ -28,13 +26,9 @@ class TestBasic:
 @synthesizeMember('second_member')
 @synthesizeMember('third_member', getterName = 'third_member_custom_getter')
 @synthesizeMember('fourth_member', setterName = 'fourth_member_custom_setter')
-class TestNamingConventionOverrideUnderscore:
+class TestUnderscore:
     pass
 
-# By the way, we try the 'naming_convention' decorator.
-# This will test that when naming convetion decorator will try to recreate accessors,
-# it will not try to remove the setter as the member is 'read only'.
-@naming_convention(NamingConventionCamelCase())
 @synthesizeMember('readOnlyMember', readOnly = True)
 class TestReadOnly:
     pass
@@ -88,14 +82,9 @@ class TestSynthesizeMember(unittest.TestCase):
         instance.giveThisToTheCustomMember("newValue")
         self.assertEqual("newValue", instance._internalPrivateSecretMemberThatShouldNeverBeUsedOutsideThisClass)
         self.assertEqual("newValue", instance.giveMeTheCustomMember())
-        
-        # Underscore member.
-        instance.set_underscore_member("_u_n_d_e_r_s_c_o_r_e_")
-        self.assertEqual("_u_n_d_e_r_s_c_o_r_e_", instance._underscore_member)
-        self.assertEqual("_u_n_d_e_r_s_c_o_r_e_", instance.underscore_member())
     
     def testNamingConventionUnderscore(self):
-        instance = TestNamingConventionOverrideUnderscore()
+        instance = TestUnderscore()
         
         # Default default ;) member value is None.
         self.assertEqual(None, instance.first_member())
