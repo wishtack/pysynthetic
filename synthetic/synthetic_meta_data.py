@@ -14,16 +14,16 @@ new_contract('SyntheticMember', SyntheticMember)
 new_contract('INamingConvetion', INamingConvention)
 
 class SyntheticMetaData:
-    def __init__(self, originalConstructor, originalMethodNameList, namingConvention):
+    def __init__(self, originalConstructor, originalMethodNameList):
         """
     :type originalMethodNameList: list(str)
-    :type namingConvention: INamingConvention
+    :type namingConvention: INamingConvention|None
 """
         self._originalConstructor = originalConstructor
         self._originalMethodNameList = originalMethodNameList
         self._syntheticMemberList = []
         self._doesConsumeArguments = False
-        self._namingConvention = namingConvention
+        self._namingConvention = None
     
     def originalConstructor(self):
         return self._originalConstructor

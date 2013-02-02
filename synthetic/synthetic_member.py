@@ -7,10 +7,22 @@
 # $Id$
 #
 
-from contracts import contract, parse
+from contracts import contract, new_contract, parse
+from .i_naming_convention import INamingConvention
 import contracts
 
+new_contract('INamingConvention', INamingConvention)
+
 class SyntheticMember:
+    
+    _GETTER_KEY = 'getter'
+    _SETTER_KEY = 'setter'
+
+    # Mappings between accessor types and their names and methods.
+    # @hack: I don't like that much.
+    _NAMING_CONVENTION_ACCESSOR_NAME_METHOD_DICT = {_GETTER_KEY: 'getterName',
+                                                    _SETTER_KEY: 'setterName'}
+    
     @contract
     def __init__(self,
                  memberName,
@@ -19,13 +31,15 @@ class SyntheticMember:
                  readOnly,
                  getterName,
                  setterName,
-                 privateMemberName):
+                 privateMemberName,
+                 namingConvention):
         """
     :type memberName: str
     :type readOnly: bool
     :type getterName: str|None
     :type setterName: str|None
     :type privateMemberName: str|None
+    :type namingConvention: INamingConvention
 """
 
         if privateMemberName is None:
@@ -38,9 +52,12 @@ class SyntheticMember:
         self._defaultValue = defaultValue
         self._contract = contract
         self._readOnly = readOnly
-        self._getterName = getterName
-        self._setterName = setterName
         self._privateMemberName = privateMemberName
+        self._namingConvention = namingConvention
+
+        # Accessor names.
+        self._accessorNameDict = {self._GETTER_KEY: getterName,
+                                  self._SETTER_KEY: setterName}
 
     def memberName(self):
         return self._memberName
@@ -54,11 +71,11 @@ class SyntheticMember:
     def isReadOnly(self):
         return self._readOnly
     
-    def getterName(self):
-        return self._getterName
+    def getterName(self, classNamingConvention):
+        return self._accessorName('getter', classNamingConvention)
     
-    def setterName(self):
-        return self._setterName
+    def setterName(self, classNamingConvention):
+        return self._accessorName('setter', classNamingConvention)
 
     def privateMemberName(self):
         return self._privateMemberName
@@ -91,3 +108,25 @@ class SyntheticMember:
             return
         
         self._contract._check_contract(value = value, context = {argumentName: value})
+
+    def _accessorName(self, accessorName, classNamingConvention):
+        """
+    :type accessorName: str
+    :type classNamingConvention: INamingConvention|None
+"""        
+        # Using user's custom getter or setter name.
+        customAccessorName = self._accessorNameDict[accessorName]
+        if customAccessorName is not None:
+            return customAccessorName
+        
+        # If the class has a custom naming convention, we use it. Cf. 'namingConvention' decorator.
+        # Otherwise, we use the member's naming convention, camelCase or underscore depending on the decorator that was used
+        # (respectively synthesizeMember or synthesize_member).
+        namingConvention = self._namingConvention
+        if classNamingConvention is not None:
+            namingConvention = classNamingConvention
+
+        # @hack: I don't like that much...
+        methodName = self._NAMING_CONVENTION_ACCESSOR_NAME_METHOD_DICT[accessorName]
+        # Using naming convention to transform member's name to an accessor name.
+        return getattr(namingConvention, methodName)(self._memberName)
