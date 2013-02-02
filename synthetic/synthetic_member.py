@@ -7,8 +7,8 @@
 # $Id$
 #
 
-from contracts import contract, new_contract, parse
 from .i_naming_convention import INamingConvention
+from contracts import contract, new_contract, parse
 import contracts
 
 new_contract('INamingConvention', INamingConvention)
@@ -19,7 +19,7 @@ class SyntheticMember:
     _SETTER_KEY = 'setter'
 
     # Mappings between accessor types and their names and methods.
-    # @hack: I don't like that much.
+    # @hack: I don't much like that.
     _NAMING_CONVENTION_ACCESSOR_NAME_METHOD_DICT = {_GETTER_KEY: 'getterName',
                                                     _SETTER_KEY: 'setterName'}
     
@@ -68,35 +68,17 @@ class SyntheticMember:
     def contract(self):
         return self._contract
     
-    def isReadOnly(self):
-        return self._readOnly
+    def accessorDict(self, classNamingConvention):
+        resultDict = {}
+        resultDict[self._accessorName(self._GETTER_KEY, classNamingConvention)] = self._makeGetter()
+        
+        # No setter if read only member.
+        if not self._readOnly:
+            resultDict[self._accessorName(self._SETTER_KEY, classNamingConvention)] = self._makeSetter()
+        return resultDict
     
-    def getterName(self, classNamingConvention):
-        return self._accessorName('getter', classNamingConvention)
-    
-    def setterName(self, classNamingConvention):
-        return self._accessorName('setter', classNamingConvention)
-
     def privateMemberName(self):
         return self._privateMemberName
-
-    def getter(self):
-        def getter(instance):
-            return getattr(instance, self.privateMemberName())
-
-        return getter
-    
-    def setter(self):
-        # No setter if read only member.
-        if self.isReadOnly():
-            return None
-        
-        def setter(instance, value):
-            if self._contract is not None:
-                self.checkContract(self._memberName, value)
-            setattr(instance, self.privateMemberName(), value)
-
-        return setter
 
     def checkContract(self, argumentName, value):
         # No contract to check.
@@ -126,7 +108,21 @@ class SyntheticMember:
         if classNamingConvention is not None:
             namingConvention = classNamingConvention
 
-        # @hack: I don't like that much...
+        # @hack: I don't much like that...
         methodName = self._NAMING_CONVENTION_ACCESSOR_NAME_METHOD_DICT[accessorName]
         # Using naming convention to transform member's name to an accessor name.
         return getattr(namingConvention, methodName)(self._memberName)
+
+    def _makeGetter(self):
+        def getter(instance):
+            return getattr(instance, self.privateMemberName())
+
+        return getter
+    
+    def _makeSetter(self):
+        def setter(instance, value):
+            if self._contract is not None:
+                self.checkContract(self._memberName, value)
+            setattr(instance, self.privateMemberName(), value)
+
+        return setter
