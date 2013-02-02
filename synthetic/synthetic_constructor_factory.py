@@ -6,7 +6,7 @@
 #
 # $Id$
 #
-from contracts import check, contract, new_contract
+from contracts import contract, new_contract
 from .synthetic_member import SyntheticMember
 import copy
 import inspect
