@@ -8,7 +8,6 @@
 #
 
 from contracts import contract, parse
-import contracts
 
 class SyntheticMember:
     @contract
@@ -82,12 +81,5 @@ class SyntheticMember:
         return setter
 
     def checkContract(self, argumentName, value):
-        # No contract to check.
-        if self._contract is None:
-            return
-        
-        # Contracts are disabled.
-        if contracts.all_disabled():
-            return
-        
-        self._contract._check_contract(value = value, context = {argumentName: value})
+        if self._contract is not None:
+            self._contract._check_contract(value = value, context = {argumentName: value})
