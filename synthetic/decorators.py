@@ -17,7 +17,7 @@ new_contract('INamingConvention', INamingConvention)
 
 @contract
 def synthesizeMember(memberName,
-               defaultValue = None,
+               default = None,
                contract = None,
                readOnly = False,
                getterName = None,
@@ -33,7 +33,7 @@ def synthesizeMember(memberName,
     :type privateMemberName: str|None
 """
     return SyntheticDecoratorFactory().syntheticMemberDecorator(memberName,
-                                                                defaultValue,
+                                                                default,
                                                                 contract,
                                                                 readOnly,
                                                                 getterName,
@@ -43,7 +43,7 @@ def synthesizeMember(memberName,
 
 @contract
 def synthesize_member(memberName,
-               defaultValue = None,
+               default = None,
                contract = None,
                readOnly = False,
                getterName = None,
@@ -59,7 +59,7 @@ def synthesize_member(memberName,
     :type privateMemberName: str|None
 """
     return SyntheticDecoratorFactory().syntheticMemberDecorator(memberName,
-                                                                defaultValue,
+                                                                default,
                                                                 contract,
                                                                 readOnly,
                                                                 getterName,

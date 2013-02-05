@@ -26,7 +26,7 @@ class SyntheticMember:
     @contract
     def __init__(self,
                  memberName,
-                 defaultValue,
+                 default,
                  contract,
                  readOnly,
                  getterName,
@@ -49,7 +49,7 @@ class SyntheticMember:
             contract = parse(contract)
             
         self._memberName = memberName
-        self._defaultValue = defaultValue
+        self._default = default
         self._contract = contract
         self._readOnly = readOnly
         self._privateMemberName = privateMemberName
@@ -62,8 +62,8 @@ class SyntheticMember:
     def memberName(self):
         return self._memberName
     
-    def defaultValue(self):
-        return self._defaultValue
+    def default(self):
+        return self._default
     
     def contract(self):
         return self._contract

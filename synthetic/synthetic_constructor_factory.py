@@ -47,7 +47,7 @@ class SyntheticConstructorFactory:
                 memberName = syntheticMember.memberName()
                 
                 # Default value.
-                value = syntheticMember.defaultValue()
+                value = syntheticMember.default()
 
                 # Constructor is synthesized.
                 if doesConsumeArguments:

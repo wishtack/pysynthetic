@@ -14,7 +14,7 @@ import contracts
 import unittest
 
 @synthesizeMember('minimalistMember')
-@synthesizeMember('memberWithDefaultValue', defaultValue = "default")
+@synthesizeMember('memberWithDefaultValue', default = "default")
 @synthesize_member('underscore_member')
 @synthesizeMember('customMember',
             getterName = 'giveMeTheCustomMember',

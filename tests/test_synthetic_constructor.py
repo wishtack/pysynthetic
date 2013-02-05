@@ -13,14 +13,14 @@ import contracts
 import unittest
 
 @synthesizeMember('minimalistMember')
-@synthesizeMember('memberWithDefaultValue', defaultValue = "default")
+@synthesizeMember('memberWithDefaultValue', default = "default")
 @synthesizeConstructor()
 class TestConstructor:
     pass
 
 @synthesizeMember('minimalistMember')
 @synthesize_constructor()
-@synthesizeMember('memberWithDefaultValue', defaultValue = "default")
+@synthesizeMember('memberWithDefaultValue', default = "default")
 class TestConstructorRandomDecoratorPosition:
     pass
 
