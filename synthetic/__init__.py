@@ -5,5 +5,5 @@ from .decorators import synthesizeMember, synthesize_member, \
                         synthesizeConstructor, synthesize_constructor, \
                         namingConvention, naming_convention
 
-__version__ = "0.3.5"
+__version__ = "0.3.6"
 
