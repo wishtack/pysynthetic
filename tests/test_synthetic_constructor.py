@@ -266,7 +266,9 @@ class TestSynthesizeConstructor(unittest.TestCase):
         except ContractNotRespected as e:
             self.assertEqual("""\
 Expected type 'str', got 'NoneType'.
-checking: str   (memberString: Instance of NoneType: None)   for value: Instance of NoneType: None   """, str(e))
+checking: str   for value: Instance of NoneType: None   
+Variables bound in inner context:
+- memberString: Instance of NoneType: None""", str(e))
 
     def testContractDisabled(self):
         # Disabling contracts.

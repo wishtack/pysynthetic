@@ -8,8 +8,10 @@
 #
 
 from contracts import ContractNotRespected
-from synthetic import synthesizeMember, synthesize_member, namingConvention, naming_convention, \
-                      NamingConventionCamelCase, NamingConventionUnderscore
+from synthetic import DuplicateMemberNameError, \
+                      NamingConventionCamelCase, NamingConventionUnderscore, \
+                      synthesizeMember, synthesize_member, \
+                      namingConvention, naming_convention
 import contracts
 import unittest
 
@@ -60,6 +62,9 @@ class TestCustomAccessors:
     
     def set_member_with_custom_setter(self, value):
         self._member_with_custom_setter = 'member_with_custom_setter_value'
+
+class TestClass:
+    pass
 
 class TestSynthesizeMember(unittest.TestCase):
 
@@ -170,10 +175,13 @@ We also check that there's no bug if the naming convention is changed.
         # Checking exception message.
         try:
             instance.setMemberString(10)
+            self.fail(u"Exception not raised.")
         except ContractNotRespected as e:
             self.assertEqual("""\
 Expected type 'str', got 'int'.
-checking: str   (memberString: Instance of int: 10)   for value: Instance of int: 10   """, str(e))
+checking: str   for value: Instance of int: 10   
+Variables bound in inner context:
+- memberString: Instance of int: 10""", str(e))
 
     def testContractDisabled(self):
         instance = TestContract()
@@ -183,3 +191,13 @@ checking: str   (memberString: Instance of int: 10)   for value: Instance of int
         # No exception is raised
         instance.setMemberString(10)
         instance.setMemberStringList(["a", 2])
+
+    def testDuplicateMemberName(self):
+        # Equivalent to:
+        # @syntheticMember('member')
+        # @syntheticMember('member')
+        # class TestClass:
+        #     pass
+        
+        ClassWithSynthesizedMember = synthesizeMember('member')(TestClass)
+        self.assertRaises(DuplicateMemberNameError, synthesizeMember('member'), ClassWithSynthesizedMember)

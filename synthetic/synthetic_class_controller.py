@@ -68,7 +68,8 @@ class SyntheticClassController:
             originalMethodNameList = [method[0] for method in originalMethodList]
 
             # Making the synthetic meta data.
-            syntheticMetaData = SyntheticMetaData(originalConstructor = originalConstructor,
+            syntheticMetaData = SyntheticMetaData(cls = self._class,
+                                                  originalConstructor = originalConstructor,
                                                   originalMethodNameList = originalMethodNameList)
             setattr(self._class, syntheticMetaDataName, syntheticMetaData)
         return getattr(self._class, syntheticMetaDataName)

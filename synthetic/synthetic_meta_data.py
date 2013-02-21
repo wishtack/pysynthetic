@@ -13,12 +13,24 @@ from .synthetic_member import SyntheticMember
 new_contract('SyntheticMember', SyntheticMember)
 new_contract('INamingConvetion', INamingConvention)
 
+class DuplicateMemberNameError(Exception):
+
+    @contract
+    def __init__(self, memberName, className):
+        """
+    :type memberName: str
+    :type className: str
+"""
+        super(DuplicateMemberNameError, self).__init__(u"Duplicate member name '%s' for class '%s'." % (memberName,
+                                                                                                        className))
 class SyntheticMetaData:
-    def __init__(self, originalConstructor, originalMethodNameList):
+
+    def __init__(self, cls, originalConstructor, originalMethodNameList):
         """
     :type originalMethodNameList: list(str)
     :type namingConvention: INamingConvention|None
 """
+        self._class = cls
         self._originalConstructor = originalConstructor
         self._originalMethodNameList = originalMethodNameList
         self._syntheticMemberList = []
@@ -34,8 +46,13 @@ class SyntheticMetaData:
     @contract
     def insertSyntheticMemberAtBegin(self, synthesizedMember):
         """
-    :type synthesizedMember: SyntheticMember 
+    :type synthesizedMember: SyntheticMember
+    :raises DuplicateMemberNameError
 """
+        memberName = synthesizedMember.memberName()
+        if memberName in [m.memberName() for m in self._syntheticMemberList]:
+            raise DuplicateMemberNameError(memberName, self._class.__name__)
+        
         self._syntheticMemberList.insert(0, synthesizedMember)
     
     def syntheticMemberList(self):
