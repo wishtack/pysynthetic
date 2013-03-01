@@ -19,9 +19,9 @@ import unittest
 @synthesizeMember('memberWithDefaultValue', default = "default")
 @synthesize_member('underscore_member')
 @synthesizeMember('customMember',
-            getterName = 'giveMeTheCustomMember',
-            setterName = 'giveThisToTheCustomMember',
-            privateMemberName = '_internalPrivateSecretMemberThatShouldNeverBeUsedOutsideThisClass')
+                  getterName = 'giveMeTheCustomMember',
+                  setterName = 'giveThisToTheCustomMember',
+                  privateMemberName = '_internalPrivateSecretMemberThatShouldNeverBeUsedOutsideThisClass')
 class TestBasic:
     pass
 
@@ -50,7 +50,7 @@ class TestContract:
 @namingConvention(NamingConventionUnderscore())
 @synthesizeMember('member_with_custom_getter')
 @synthesizeMember('member_with_custom_setter')
-class TestCustomAccessors:
+class TestCustomProperties:
     def member_with_custom_getter_setter(self):
         return 'member_with_custom_getter_setter_value'
     
@@ -136,7 +136,7 @@ class TestSynthesizeMember(unittest.TestCase):
         """If accessors are overriden, they should not be synthesized.
 We also check that there's no bug if the naming convention is changed.
 """
-        instance = TestCustomAccessors()
+        instance = TestCustomProperties()
         self.assertEqual(None, instance._member_with_custom_getter_setter)
         self.assertEqual(None, instance._member_with_custom_getter)
         self.assertEqual(None, instance._member_with_custom_setter)
@@ -151,7 +151,7 @@ We also check that there's no bug if the naming convention is changed.
         self.assertEqual('value', instance._member_with_custom_getter)
         
         # Testing custom getters.
-        instance = TestCustomAccessors()
+        instance = TestCustomProperties()
         self.assertEqual(None, instance._member_with_custom_getter_setter)
         self.assertEqual(None, instance._member_with_custom_getter)
         self.assertEqual(None, instance._member_with_custom_setter)

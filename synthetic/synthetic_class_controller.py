@@ -63,14 +63,13 @@ class SyntheticClassController:
             originalConstructor = getattr(self._class, '__init__', None)
             
             # List of existing methods (Python2: ismethod, Python3: isfunction).
-            originalMethodList = inspect.getmembers(self._class,
-                                                    predicate = lambda m: inspect.ismethod(m) or inspect.isfunction(m))
-            originalMethodNameList = [method[0] for method in originalMethodList]
+            originalMemberList = inspect.getmembers(self._class)
+            originalMemberNameList = [method[0] for method in originalMemberList]
 
             # Making the synthetic meta data.
             syntheticMetaData = SyntheticMetaData(cls = self._class,
                                                   originalConstructor = originalConstructor,
-                                                  originalMethodNameList = originalMethodNameList)
+                                                  originalMemberNameList = originalMemberNameList)
             setattr(self._class, syntheticMetaDataName, syntheticMetaData)
         return getattr(self._class, syntheticMetaDataName)
 
@@ -87,39 +86,39 @@ the getters and setters because the naming convention has changed.
         self._makeAccessorForEveryMember()
 
     def _makeAccessorForEveryMember(self):
-        for accessorName, accessor in self._accessorIterable():
-            self._tryToSetAccessor(accessorName, accessor)
+        for memberName, member in self._memberIterable():
+            self._tryToSetMember(memberName, member)
 
     def _removeAccessorForEveryMember(self):
-        for accessorName, _ in self._accessorIterable():
-            self._removeAccessor(accessorName)
+        for memberName, _ in self._memberIterable():
+            self._tryRemoveMember(memberName)
     
-    def _accessorIterable(self):
+    def _memberIterable(self):
         syntheticMetaData = self._syntheticMetaData()
         classNamingConvention = syntheticMetaData.namingConvention()
         for syntheticMember in syntheticMetaData.syntheticMemberList():
-            accessorDict = syntheticMember.accessorDict(classNamingConvention)
-            for accessorName, accessor in accessorDict.items():
-                yield accessorName, accessor
+            memberDict = syntheticMember.memberDict(classNamingConvention)
+            for memberName, member in memberDict.items():
+                yield memberName, member
 
     @contract
-    def _tryToSetAccessor(self, accessorName, accessor):
+    def _tryToSetMember(self, accessorName, accessor):
         """
     :type accessorName: str
 """
         # Don't synthesize accessor if it is overriden by the user.
-        if accessorName in self._syntheticMetaData().originalMethodNameList():
+        if accessorName in self._syntheticMetaData().originalMemberNameList():
             return
         
         setattr(self._class, accessorName, accessor)
 
     @contract
-    def _removeAccessor(self, accessorName):
+    def _tryRemoveMember(self, accessorName):
         """
     :type accessorName: str
 """
         # Don't remove accessor if it is overriden by the user.
-        if accessorName in self._syntheticMetaData().originalMethodNameList():
+        if accessorName in self._syntheticMetaData().originalMemberNameList():
             return
         
         delattr(self._class, accessorName)

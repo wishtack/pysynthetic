@@ -7,11 +7,13 @@
 # $Id$
 #
 
-from contracts import contract, new_contract
+from .i_member_factory import IMemberFactory
 from .i_naming_convention import INamingConvention
 from .synthetic_class_controller import SyntheticClassController
 from .synthetic_member import SyntheticMember
+from contracts import contract, new_contract
 
+new_contract('IMemberFactory', IMemberFactory)
 new_contract('INamingConvention', INamingConvention)
 new_contract('SyntheticMember', SyntheticMember)
 
@@ -23,27 +25,21 @@ class SyntheticDecoratorFactory:
                                  defaultValue,
                                  contract,
                                  readOnly,
-                                 getterName,
-                                 setterName,
                                  privateMemberName,
-                                 namingConvention):
+                                 memberFactory):
         """
     :type memberName: str
     :type readOnly: bool
-    :type getterName: str|None
-    :type setterName: str|None
     :type privateMemberName: str|None
-    :type namingConvention: INamingConvention
+    :type memberFactory: IMemberFactory
 """
         def decoratorFunction(cls):
             syntheticMember = SyntheticMember(memberName,
                                               defaultValue,
                                               contract,
                                               readOnly,
-                                              getterName,
-                                              setterName,
                                               privateMemberName,
-                                              namingConvention)
+                                              memberFactory = memberFactory)
 
             SyntheticClassController(cls).addSyntheticMember(syntheticMember)
 

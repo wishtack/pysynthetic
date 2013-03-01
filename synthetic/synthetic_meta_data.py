@@ -25,14 +25,14 @@ class DuplicateMemberNameError(Exception):
                                                                                                         className))
 class SyntheticMetaData:
 
-    def __init__(self, cls, originalConstructor, originalMethodNameList):
+    def __init__(self, cls, originalConstructor, originalMemberNameList):
         """
-    :type originalMethodNameList: list(str)
+    :type originalMemberNameList: list(str)
     :type namingConvention: INamingConvention|None
 """
         self._class = cls
         self._originalConstructor = originalConstructor
-        self._originalMethodNameList = originalMethodNameList
+        self._originalMemberNameList = originalMemberNameList
         self._syntheticMemberList = []
         self._doesConsumeArguments = False
         self._namingConvention = None
@@ -40,8 +40,8 @@ class SyntheticMetaData:
     def originalConstructor(self):
         return self._originalConstructor
 
-    def originalMethodNameList(self):
-        return self._originalMethodNameList
+    def originalMemberNameList(self):
+        return self._originalMemberNameList
 
     @contract
     def insertSyntheticMemberAtBegin(self, synthesizedMember):
