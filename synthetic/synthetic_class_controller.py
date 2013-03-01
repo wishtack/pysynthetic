@@ -33,13 +33,13 @@ class SyntheticClassController:
         self._syntheticMetaData().insertSyntheticMemberAtBegin(syntheticMember)
 
         # Update constructor and recreate accessors.
-        self._updateConstructorAndAccessors()
+        self._updateConstructorAndMembers()
     
     def synthesizeConstructor(self):
         self._syntheticMetaData().setConsumeArguments(True)
 
         # Update constructor and recreate accessors.
-        self._updateConstructorAndAccessors()
+        self._updateConstructorAndMembers()
     
     @contract
     def setNamingConvention(self, namingConvention):
@@ -47,13 +47,13 @@ class SyntheticClassController:
     :type namingConvention: INamingConvention
 """
         # Remove getters and setters with old naming convention.
-        self._removeAccessorForEveryMember()
+        self._removeSyntheticMembers()
         
         # Set new naming convention.
         self._syntheticMetaData().setNamingConvention(namingConvention)
 
         # Update constructor and recreate accessors.
-        self._updateConstructorAndAccessors()
+        self._updateConstructorAndMembers()
 
     def _syntheticMetaData(self):
         # SyntheticMetaData does not exist...
@@ -63,18 +63,17 @@ class SyntheticClassController:
             originalConstructor = getattr(self._class, '__init__', None)
             
             # List of existing methods (Python2: ismethod, Python3: isfunction).
-            originalMethodList = inspect.getmembers(self._class,
-                                                    predicate = lambda m: inspect.ismethod(m) or inspect.isfunction(m))
-            originalMethodNameList = [method[0] for method in originalMethodList]
+            originalMemberList = inspect.getmembers(self._class)
+            originalMemberNameList = [method[0] for method in originalMemberList]
 
             # Making the synthetic meta data.
             syntheticMetaData = SyntheticMetaData(cls = self._class,
                                                   originalConstructor = originalConstructor,
-                                                  originalMethodNameList = originalMethodNameList)
+                                                  originalMemberNameList = originalMemberNameList)
             setattr(self._class, syntheticMetaDataName, syntheticMetaData)
         return getattr(self._class, syntheticMetaDataName)
 
-    def _updateConstructorAndAccessors(self):
+    def _updateConstructorAndMembers(self):
         """We overwrite constructor and accessors every time because the constructor might have to consume all
 members even if their decorator is below the "synthesizeConstructor" decorator and it also might need to update
 the getters and setters because the naming convention has changed.
@@ -84,42 +83,14 @@ the getters and setters because the naming convention has changed.
                                                                syntheticMetaData.syntheticMemberList(),
                                                                syntheticMetaData.doesConsumeArguments())
         self._class.__init__ = constructor
-        self._makeAccessorForEveryMember()
-
-    def _makeAccessorForEveryMember(self):
-        for accessorName, accessor in self._accessorIterable():
-            self._tryToSetAccessor(accessorName, accessor)
-
-    def _removeAccessorForEveryMember(self):
-        for accessorName, _ in self._accessorIterable():
-            self._removeAccessor(accessorName)
-    
-    def _accessorIterable(self):
-        syntheticMetaData = self._syntheticMetaData()
-        classNamingConvention = syntheticMetaData.namingConvention()
         for syntheticMember in syntheticMetaData.syntheticMemberList():
-            accessorDict = syntheticMember.accessorDict(classNamingConvention)
-            for accessorName, accessor in accessorDict.items():
-                yield accessorName, accessor
+            syntheticMember.apply(self._class,
+                                  syntheticMetaData.originalMemberNameList(),
+                                  syntheticMetaData.namingConvention())
 
-    @contract
-    def _tryToSetAccessor(self, accessorName, accessor):
-        """
-    :type accessorName: str
-"""
-        # Don't synthesize accessor if it is overriden by the user.
-        if accessorName in self._syntheticMetaData().originalMethodNameList():
-            return
-        
-        setattr(self._class, accessorName, accessor)
-
-    @contract
-    def _removeAccessor(self, accessorName):
-        """
-    :type accessorName: str
-"""
-        # Don't remove accessor if it is overriden by the user.
-        if accessorName in self._syntheticMetaData().originalMethodNameList():
-            return
-        
-        delattr(self._class, accessorName)
+    def _removeSyntheticMembers(self):
+        syntheticMetaData = self._syntheticMetaData()
+        for syntheticMember in syntheticMetaData.syntheticMemberList():
+            syntheticMember.remove(self._class,
+                                   syntheticMetaData.originalMemberNameList(),
+                                   syntheticMetaData.namingConvention())

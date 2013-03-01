@@ -8,62 +8,77 @@
 #
 
 from contracts import ContractNotRespected
-from synthetic import synthesizeMember, synthesizeConstructor, synthesize_constructor
+from synthetic import synthesizeConstructor, synthesize_constructor, synthesizeMember, synthesizeProperty
 import contracts
 import unittest
 
 @synthesizeMember('minimalistMember')
+@synthesizeProperty('minimalistProperty')
 @synthesizeMember('memberWithDefaultValue', default = "default")
+@synthesizeProperty('propertyWithDefaultValue', default = "default")
 @synthesizeConstructor()
 class TestConstructor:
     pass
 
 @synthesizeMember('minimalistMember')
+@synthesizeProperty('minimalistProperty')
 @synthesize_constructor()
 @synthesizeMember('memberWithDefaultValue', default = "default")
+@synthesizeProperty('propertyWithDefaultValue', default = "default")
 class TestConstructorRandomDecoratorPosition:
     pass
 
 
 @synthesizeMember('baseMember')
+@synthesizeProperty('baseProperty')
 @synthesizeConstructor()
 class TestBase:
     pass
 
 @synthesizeMember('intermediateMember')
+@synthesizeProperty('intermediateProperty')
 @synthesizeConstructor()
 class TestIntermediate(TestBase):
     pass
 
 @synthesizeMember('childMember')
+@synthesizeProperty('childProperty')
 @synthesizeConstructor()
 class TestChild(TestIntermediate):
     pass
 
 @synthesizeMember('memberString', contract = str)
 @synthesizeMember('memberStringList', contract = 'list(str)')
+@synthesizeProperty('propertyString', contract = str)
+@synthesizeProperty('propertyStringList', contract = 'list(str)')
 @synthesizeConstructor()
 class TestContract:
     pass
 
 @synthesizeMember('implicitMember')
-@synthesizeMember('overridenMember')
+@synthesizeMember('overriddenMember')
+@synthesizeProperty('implicitProperty')
+@synthesizeProperty('overriddenProperty')
 @synthesizeConstructor()
 class TestCustomConstructor:
     # It's important to test annotations, this force us to use "getfullargspec" instead of "getargspec".
-    def __init__(self, overridenMember, extraMember, defaultValueMember = None):
-        self._overridenMemberArgument = overridenMember
-        self._extraMemberArgument = extraMember
+    def __init__(self, overriddenMember, overriddenProperty, extraArgument, defaultValueMember = None):
+        self._overriddenMemberArgument = overriddenMember
+        self._overriddenPropertyArgument = overriddenProperty
+        self._extraArgument = extraArgument
         self._defaultValueMemberArgument = defaultValueMember
-        self._overridenMember = "overriden"
+        self._overriddenMember = "overriddenMember"
+        self._overriddenProperty = "overriddenProperty"
 
-@synthesizeMember('a')
-@synthesizeMember('b')
-@synthesizeMember('c')
+@synthesizeMember('memberA')
+@synthesizeProperty('propertyB')
+@synthesizeMember('memberC')
+@synthesizeProperty('propertyD')
 @synthesizeConstructor()
 class TestVariadicAndKewordedConstructor:
-    def __init__(self, a, *args, **kwargs):
-        self._aArgument = a
+    def __init__(self, memberA, propertyB, *args, **kwargs):
+        self._aArgument = memberA
+        self._bArgument = propertyB
         self._args = args
         self._kwargs = kwargs
 
@@ -78,187 +93,284 @@ class TestSynthesizeConstructor(unittest.TestCase):
             
             instance = cls()
             self.assertEqual(None, instance.minimalistMember())
+            self.assertEqual(None, instance.minimalistProperty)
             self.assertEqual("default", instance.memberWithDefaultValue())
+            self.assertEqual("default", instance.propertyWithDefaultValue)
     
             instance = cls(1)
             self.assertEqual(1, instance.minimalistMember())
+            self.assertEqual(None, instance.minimalistProperty)
             self.assertEqual("default", instance.memberWithDefaultValue())
+            self.assertEqual("default", instance.propertyWithDefaultValue)
     
             instance = cls(1, 2)
             self.assertEqual(1, instance.minimalistMember())
-            self.assertEqual(2, instance.memberWithDefaultValue())
+            self.assertEqual(2, instance.minimalistProperty)
+            self.assertEqual("default", instance.memberWithDefaultValue())
+            self.assertEqual("default", instance.propertyWithDefaultValue)
+
+            instance = cls(1, 2, 3)
+            self.assertEqual(1, instance.minimalistMember())
+            self.assertEqual(2, instance.minimalistProperty)
+            self.assertEqual(3, instance.memberWithDefaultValue())
+            self.assertEqual("default", instance.propertyWithDefaultValue)
+
+            instance = cls(1, 2, 3, 4)
+            self.assertEqual(1, instance.minimalistMember())
+            self.assertEqual(2, instance.minimalistProperty)
+            self.assertEqual(3, instance.memberWithDefaultValue())
+            self.assertEqual(4, instance.propertyWithDefaultValue)
             
             instance = cls(1, memberWithDefaultValue = 2)
             self.assertEqual(1, instance.minimalistMember())
+            self.assertEqual(None, instance.minimalistProperty)
             self.assertEqual(2, instance.memberWithDefaultValue())
+            self.assertEqual("default", instance.propertyWithDefaultValue)
     
-            instance = cls(memberWithDefaultValue = 2)
+            instance = cls(propertyWithDefaultValue = 2)
             self.assertEqual(None, instance.minimalistMember())
-            self.assertEqual(2, instance.memberWithDefaultValue())
+            self.assertEqual(None, instance.minimalistProperty)
+            self.assertEqual("default", instance.memberWithDefaultValue())
+            self.assertEqual(2, instance.propertyWithDefaultValue)
     
     def testInheritance(self):
-        instance = TestChild(1, 2, 3)
+        instance = TestChild(1, 2, 3, 4, 5, 6)
         self.assertEqual(1, instance.childMember())
-        self.assertEqual(2, instance.intermediateMember())
-        self.assertEqual(3, instance.baseMember())
+        self.assertEqual(2, instance.childProperty)
+        self.assertEqual(3, instance.intermediateMember())
+        self.assertEqual(4, instance.intermediateProperty)
+        self.assertEqual(5, instance.baseMember())
+        self.assertEqual(6, instance.baseProperty)
         
-        instance = TestChild(childMember = 1, intermediateMember = 2, baseMember = 3)
+        instance = TestChild(childMember = 1,
+                             childProperty = 2,
+                             intermediateMember = 3,
+                             intermediateProperty = 4,
+                             baseMember = 5,
+                             baseProperty = 6)
         self.assertEqual(1, instance.childMember())
-        self.assertEqual(2, instance.intermediateMember())
-        self.assertEqual(3, instance.baseMember())
+        self.assertEqual(2, instance.childProperty)
+        self.assertEqual(3, instance.intermediateMember())
+        self.assertEqual(4, instance.intermediateProperty)
+        self.assertEqual(5, instance.baseMember())
+        self.assertEqual(6, instance.baseProperty)
 
-        instance = TestChild(baseMember = 3)
+        instance = TestChild(baseMember = 1, baseProperty = 2)
         self.assertEqual(None, instance.childMember())
+        self.assertEqual(None, instance.childProperty)
         self.assertEqual(None, instance.intermediateMember())
-        self.assertEqual(3, instance.baseMember())
+        self.assertEqual(None, instance.intermediateProperty)
+        self.assertEqual(1, instance.baseMember())
+        self.assertEqual(2, instance.baseProperty)
 
     def testCustomConstructor(self):
-        # TestCustomConstructor __init__ method takes 3 parameters (minimalistMember, overridenMember and extraMember) + self.
+        # TestCustomConstructor __init__ method takes 4 parameters
+        # (overriddenMember, overriddenProperty and extraArgument) + self.
         self.assertRaises(TypeError, TestCustomConstructor)
-        self.assertRaises(TypeError, TestCustomConstructor, "minimalist")
+        self.assertRaises(TypeError, TestCustomConstructor, "member")
+        self.assertRaises(TypeError, TestCustomConstructor, "member", "property")
         
         # Two mandatory arguments.
-        for instance in [TestCustomConstructor("original", "extra"),
-                         TestCustomConstructor("original", extraMember = "extra"),
-                         TestCustomConstructor(overridenMember = "original", extraMember = "extra")]:
+        for instance in [TestCustomConstructor("overriddenMemberArgument", "overriddenPropertyArgument", "extra"),
+                         TestCustomConstructor("overriddenMemberArgument", "overriddenPropertyArgument", extraArgument = "extra"),
+                         TestCustomConstructor(overriddenMember = "overriddenMemberArgument",
+                                               overriddenProperty = "overriddenPropertyArgument",
+                                               extraArgument = "extra")]:
+            
             self.assertEqual(None, instance.implicitMember())
-            self.assertEqual("overriden", instance.overridenMember())
-            self.assertEqual("original", instance._overridenMemberArgument)
-            self.assertEqual("extra", instance._extraMemberArgument)
+            self.assertEqual("overriddenMember", instance.overriddenMember())
+            self.assertEqual("overriddenProperty", instance.overriddenProperty)
+            self.assertEqual("overriddenMemberArgument", instance._overriddenMemberArgument)
+            self.assertEqual("overriddenPropertyArgument", instance._overriddenPropertyArgument)
+            self.assertEqual("extra", instance._extraArgument)
 
-        # Two mandatory arguments + defaultValueMember
-        for instance in [TestCustomConstructor("original",
+        # Three mandatory arguments + defaultValueMember
+        for instance in [TestCustomConstructor("overriddenMemberArgument",
+                                               "overriddenPropertyArgument",
                                                "extra",
                                                "valueForDefaultValueMember"),
-                         TestCustomConstructor("original",
+                         TestCustomConstructor("overriddenMemberArgument",
+                                               "overriddenPropertyArgument",
                                                "extra",
                                                defaultValueMember = "valueForDefaultValueMember"),
-                         TestCustomConstructor("original",
-                                               extraMember = "extra",
+                         TestCustomConstructor("overriddenMemberArgument",
+                                               "overriddenPropertyArgument",
+                                               extraArgument = "extra",
                                                defaultValueMember = "valueForDefaultValueMember"),
-                         TestCustomConstructor(overridenMember = "original",
-                                               extraMember = "extra",
+                         TestCustomConstructor(overriddenMember = "overriddenMemberArgument",
+                                               overriddenProperty = "overriddenPropertyArgument",
+                                               extraArgument = "extra",
                                                defaultValueMember = "valueForDefaultValueMember")]:
             self.assertEqual(None, instance.implicitMember())
-            self.assertEqual("overriden", instance.overridenMember())
-            self.assertEqual("original", instance._overridenMemberArgument)
-            self.assertEqual("extra", instance._extraMemberArgument)
+            self.assertEqual("overriddenMember", instance.overriddenMember())
+            self.assertEqual("overriddenProperty", instance.overriddenProperty)
+            self.assertEqual("overriddenMemberArgument", instance._overriddenMemberArgument)
+            self.assertEqual("overriddenPropertyArgument", instance._overriddenPropertyArgument)
+            self.assertEqual("extra", instance._extraArgument)
             self.assertEqual("valueForDefaultValueMember", instance._defaultValueMemberArgument)
 
-        # Two mandatory arguments + defaultValueMember + implicitMember.
-        for instance in [TestCustomConstructor("original",
+        # Three mandatory arguments + defaultValueMember + implicitMember.
+        for instance in [TestCustomConstructor("overriddenMemberArgument",
+                                               "overriddenPropertyArgument",
                                                "extra",
                                                "valueForDefaultValueMember",
-                                               "implicit"),
-                         TestCustomConstructor("original",
+                                               "implicitMember",
+                                               "implicitProperty"),
+                         TestCustomConstructor("overriddenMemberArgument",
+                                               "overriddenPropertyArgument",
                                                "extra",
                                                "valueForDefaultValueMember",
-                                               implicitMember = "implicit"),
-                         TestCustomConstructor("original",
+                                               implicitMember = "implicitMember",
+                                               implicitProperty = "implicitProperty"),
+                         TestCustomConstructor("overriddenMemberArgument",
+                                               "overriddenPropertyArgument",
                                                "extra",
                                                defaultValueMember = "valueForDefaultValueMember",
-                                               implicitMember = "implicit"),
-                         TestCustomConstructor("original",
-                                               extraMember = "extra",
+                                               implicitMember = "implicitMember",
+                                               implicitProperty = "implicitProperty"),
+                         TestCustomConstructor("overriddenMemberArgument",
+                                               "overriddenPropertyArgument",
+                                               extraArgument = "extra",
                                                defaultValueMember = "valueForDefaultValueMember",
-                                               implicitMember = "implicit"),
-                         TestCustomConstructor(overridenMember = "original",
-                                               extraMember = "extra",
+                                               implicitMember = "implicitMember",
+                                               implicitProperty = "implicitProperty"),
+                         TestCustomConstructor(overriddenMember = "overriddenMemberArgument",
+                                               overriddenProperty = "overriddenPropertyArgument",
+                                               extraArgument = "extra",
                                                defaultValueMember = "valueForDefaultValueMember",
-                                               implicitMember = "implicit")]:
-            self.assertEqual("implicit", instance.implicitMember())
-            self.assertEqual("overriden", instance.overridenMember())
-            self.assertEqual("original", instance._overridenMemberArgument)
-            self.assertEqual("extra", instance._extraMemberArgument)
+                                               implicitMember = "implicitMember",
+                                               implicitProperty = "implicitProperty")]:
+            self.assertEqual("implicitMember", instance.implicitMember())
+            self.assertEqual("implicitProperty", instance.implicitProperty)
+            self.assertEqual("overriddenMember", instance.overriddenMember())
+            self.assertEqual("overriddenProperty", instance.overriddenProperty)
+            self.assertEqual("overriddenMemberArgument", instance._overriddenMemberArgument)
+            self.assertEqual("overriddenPropertyArgument", instance._overriddenPropertyArgument)
+            self.assertEqual("extra", instance._extraArgument)
             self.assertEqual("valueForDefaultValueMember", instance._defaultValueMemberArgument)
 
-        # Two mandatory arguments + defaultValueMember + implicitMember + superfluous argument.
+        # Three mandatory arguments + defaultValueMember + implicitMember + implicitProperty + superfluous argument.
         self.assertRaises(TypeError,
                           TestCustomConstructor,
-                          "original",
+                          "overriddenMemberArgument",
+                          "overriddenPropertyArgument",
                           "extra",
                           "valueForDefaultValueMember",
-                          "implicit",
+                          "implicitMember",
+                          "implicitProperty",
                           "superfluous")
         self.assertRaises(TypeError,
                           TestCustomConstructor,
-                          "original",
+                          "overriddenMemberArgument",
+                          "overriddenPropertyArgument",
                           "extra",
                           "valueForDefaultValueMember",
-                          "implicit",
+                          "implicitMember",
+                          "implicitProperty",
                           superfluousMember = "superfluous")
         self.assertRaises(TypeError,
                           TestCustomConstructor,
-                          "original",
+                          "overriddenMemberArgument",
+                          "overriddenPropertyArgument",
                           "extra",
                           "valueForDefaultValueMember",
-                          implicitMember = "implicit",
+                          implicitMember = "implicitMember",
+                          implicitProperty = "implicitProperty",
                           superfluousMember = "superfluous")
         self.assertRaises(TypeError,
                           TestCustomConstructor,
-                          "original",
+                          "overriddenMemberArgument",
+                          "overriddenPropertyArgument",
                           "extra",
                           "valueForDefaultValueMember",
-                          implicitMember = "implicit",
+                          implicitMember = "implicitMember",
+                          implicitProperty = "implicitProperty",
                           superfluousMember = "superfluous")
         self.assertRaises(TypeError,
                           TestCustomConstructor,
-                          "original",
+                          "overriddenMemberArgument",
+                          "overriddenPropertyArgument",
                           "extra",
                           defaultValueMember = "valueForDefaultValueMember",
-                          implicitMember = "implicit",
+                          implicitMember = "implicitMember",
+                          implicitProperty = "implicitProperty",
                           superfluousMember = "superfluous")
         self.assertRaises(TypeError,
                           TestCustomConstructor,
-                          "original",
-                          extraMember = "extra",
+                          "overriddenMemberArgument",
+                          "overriddenPropertyArgument",
+                          extraArgument = "extra",
                           defaultValueMember = "valueForDefaultValueMember",
-                          implicitMember = "implicit",
+                          implicitMember = "implicitMember",
+                          implicitProperty = "implicitProperty",
                           superfluousMember = "superfluous")
         self.assertRaises(TypeError,
                           TestCustomConstructor,
-                          overridenMember = "original",
-                          extraMember = "extra",
+                          overriddenMember = "overriddenMemberArgument",
+                          overriddenProperty = "overriddenPropertyArgument",
+                          extraArgument = "extra",
                           defaultValueMember = "valueForDefaultValueMember",
-                          implicitMember = "implicit",
+                          implicitMember = "implicitMember",
+                          implicitProperty = "implicitProperty",
                           superfluousMember = "superfluous")
                 
         # Using superfluous member while implicit member is not set.
         self.assertRaises(TypeError,
                           TestCustomConstructor,
-                          "original",
+                          "overriddenMemberArgument",
+                          "overriddenPropertyArgument",
                           "extra",
                           "valueForDefaultValueMember",
                           superfluousMember = "superfluous")
         # Using superfluous member while implicit member and member with default value are not set.
         self.assertRaises(TypeError,
                           TestCustomConstructor,
-                          "original",
+                          "overriddenMemberArgument",
+                          "overriddenPropertyArgument",
                           "extra",
                           superfluousMember = "superfluous")
 
     def testVariadicAndKeywordedArguments(self):
-        instance = TestVariadicAndKewordedConstructor(1, 2, 3, 4, 5, c = 10, d = 11, e = 12)
+        instance = TestVariadicAndKewordedConstructor(1, 2, 3, 4, 5, memberC = 10, propertyD = 11, e = 12)
         self.assertEqual(1, instance._aArgument)
-        self.assertEqual((2, 3, 4, 5), instance._args)
-        self.assertEqual({"c": 10, "d": 11, "e": 12}, instance._kwargs)
-        self.assertEqual(1, instance.a())
-        self.assertEqual(2, instance.b())
-        self.assertEqual(10, instance.c())
+        self.assertEqual(2, instance._bArgument)
+        self.assertEqual((3, 4, 5), instance._args)
+        self.assertEqual({"memberC": 10, "propertyD": 11, "e": 12}, instance._kwargs)
+        self.assertEqual(1, instance.memberA())
+        self.assertEqual(2, instance.propertyB)
+        self.assertEqual(10, instance.memberC())
+        self.assertEqual(11, instance.propertyD)
 
     def testContract(self):
         # OK.
-        TestContract(memberString = "Be free! Kill bureaucracy!!!",
-                     memberStringList = ["a", "b"])
+        validKwargs = {'memberString': "Be free! Kill bureaucracy!!!",
+                       'propertyString': "Be free! Kill bureaucracy!!!",
+                       'memberStringList': ["a", "b"],
+                       'propertyStringList': ["a", "b"]}
+        TestContract(**validKwargs)
 
-        # memberString and memberStringList can't be None.
+        # memberString, propertyString, memberStringList and propertyStringList can't be None.
         self.assertRaises(ContractNotRespected, TestContract)
         
         # Invalid memberString.
-        self.assertRaises(ContractNotRespected, TestContract, memberString = 1234, memberStringList = ["a", "b"])
+        kwargs = validKwargs.copy()
+        kwargs['memberString'] = 1234
+        self.assertRaises(ContractNotRespected, TestContract, **kwargs)
+
+        # Invalid propertyString.
+        kwargs = validKwargs.copy()
+        kwargs['propertyString'] = 1234
+        self.assertRaises(ContractNotRespected, TestContract, **kwargs)
 
         # Invalid memberStringList.
-        self.assertRaises(ContractNotRespected, TestContract, memberString = "test", memberStringList = ["a", 2])
+        kwargs = validKwargs.copy()
+        kwargs['memberStringList'] = ["a", 2]
+        self.assertRaises(ContractNotRespected, TestContract, **kwargs)
+
+        # Invalid propertyStringList.
+        kwargs = validKwargs.copy()
+        kwargs['propertyStringList'] = ["a", 2]
+        self.assertRaises(ContractNotRespected, TestContract, **kwargs)
 
         # Checking exception message.
         try:
@@ -271,10 +383,33 @@ Variables bound in inner context:
 - memberString: Instance of NoneType: None""", str(e))
 
     def testContractDisabled(self):
+        validKwargs = {'memberString': "Be free! Kill bureaucracy!!!",
+                       'propertyString': "Be free! Kill bureaucracy!!!",
+                       'memberStringList': ["a", "b"],
+                       'propertyStringList': ["a", "b"]}
+        
         # Disabling contracts.
         contracts.disable_all()
         
         # No exception is raised.
         TestContract()
-        TestContract(memberString = 1234, memberStringList = ["a", "b"])
-        TestContract(memberString = "test", memberStringList = ["a", 2])
+
+        # Invalid memberString but no exception is raised.
+        kwargs = validKwargs.copy()
+        kwargs['memberString'] = 1234
+        TestContract(**kwargs)
+
+        # Invalid propertyString but no exception is raised.
+        kwargs = validKwargs.copy()
+        kwargs['propertyString'] = 1234
+        TestContract(**kwargs)
+
+        # Invalid memberStringList but no exception is raised.
+        kwargs = validKwargs.copy()
+        kwargs['memberStringList'] = ["a", 2]
+        TestContract(**kwargs)
+
+        # Invalid propertyStringList but no exception is raised.
+        kwargs = validKwargs.copy()
+        kwargs['propertyStringList'] = ["a", 2]
+        TestContract(**kwargs)

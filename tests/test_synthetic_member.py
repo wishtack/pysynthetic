@@ -19,9 +19,9 @@ import unittest
 @synthesizeMember('memberWithDefaultValue', default = "default")
 @synthesize_member('underscore_member')
 @synthesizeMember('customMember',
-            getterName = 'giveMeTheCustomMember',
-            setterName = 'giveThisToTheCustomMember',
-            privateMemberName = '_internalPrivateSecretMemberThatShouldNeverBeUsedOutsideThisClass')
+                  getterName = 'giveMeTheCustomMember',
+                  setterName = 'giveThisToTheCustomMember',
+                  privateMemberName = '_internalPrivateSecretMemberThatShouldNeverBeUsedOutsideThisClass')
 class TestBasic:
     pass
 
@@ -46,19 +46,19 @@ class TestReadOnly:
 class TestContract:
     pass
 
-@synthesizeMember('member_with_custom_getter_setter')
+@synthesizeMember('member_with_overridden_getter_setter')
 @namingConvention(NamingConventionUnderscore())
-@synthesizeMember('member_with_custom_getter')
+@synthesizeMember('member_with_overridden_getter')
 @synthesizeMember('member_with_custom_setter')
-class TestCustomAccessors:
-    def member_with_custom_getter_setter(self):
-        return 'member_with_custom_getter_setter_value'
+class TestOverriddenAccessors:
+    def member_with_overridden_getter_setter(self):
+        return 'member_with_overridden_getter_setter_value'
     
-    def set_member_with_custom_getter_setter(self, value):
-        self._member_with_custom_getter_setter = 'member_with_custom_getter_setter_value'
+    def set_member_with_overridden_getter_setter(self, value):
+        self._member_with_overridden_getter_setter = 'member_with_overridden_getter_setter_value'
 
-    def member_with_custom_getter(self):
-        return 'member_with_custom_getter_value'
+    def member_with_overridden_getter(self):
+        return 'member_with_overridden_getter_value'
     
     def set_member_with_custom_setter(self, value):
         self._member_with_custom_setter = 'member_with_custom_setter_value'
@@ -132,34 +132,34 @@ class TestSynthesizeMember(unittest.TestCase):
         self.assertTrue(hasattr(instance, 'readOnlyMember'))
         self.assertFalse(hasattr(instance, 'setReadOnlyMember'))
     
-    def testCustomAccessors(self):
+    def test(self):
         """If accessors are overriden, they should not be synthesized.
 We also check that there's no bug if the naming convention is changed.
 """
-        instance = TestCustomAccessors()
-        self.assertEqual(None, instance._member_with_custom_getter_setter)
-        self.assertEqual(None, instance._member_with_custom_getter)
+        instance = TestOverriddenAccessors()
+        self.assertEqual(None, instance._member_with_overridden_getter_setter)
+        self.assertEqual(None, instance._member_with_overridden_getter)
         self.assertEqual(None, instance._member_with_custom_setter)
 
         # Testing custom setters.
-        instance.set_member_with_custom_getter_setter('placeholder')
+        instance.set_member_with_overridden_getter_setter('placeholder')
         instance.set_member_with_custom_setter('placeholder')
-        instance.set_member_with_custom_getter('value')
+        instance.set_member_with_overridden_getter('value')
         
-        self.assertEqual('member_with_custom_getter_setter_value', instance._member_with_custom_getter_setter)
+        self.assertEqual('member_with_overridden_getter_setter_value', instance._member_with_overridden_getter_setter)
         self.assertEqual('member_with_custom_setter_value', instance._member_with_custom_setter)
-        self.assertEqual('value', instance._member_with_custom_getter)
+        self.assertEqual('value', instance._member_with_overridden_getter)
         
         # Testing custom getters.
-        instance = TestCustomAccessors()
-        self.assertEqual(None, instance._member_with_custom_getter_setter)
-        self.assertEqual(None, instance._member_with_custom_getter)
+        instance = TestOverriddenAccessors()
+        self.assertEqual(None, instance._member_with_overridden_getter_setter)
+        self.assertEqual(None, instance._member_with_overridden_getter)
         self.assertEqual(None, instance._member_with_custom_setter)
         
         instance._member_with_custom_setter = 'value'
-        self.assertEqual('member_with_custom_getter_setter_value', instance.member_with_custom_getter_setter())
+        self.assertEqual('member_with_overridden_getter_setter_value', instance.member_with_overridden_getter_setter())
         self.assertEqual('value', instance.member_with_custom_setter())
-        self.assertEqual('member_with_custom_getter_value', instance.member_with_custom_getter())
+        self.assertEqual('member_with_overridden_getter_value', instance.member_with_overridden_getter())
 
     def testContract(self):
         instance = TestContract()
