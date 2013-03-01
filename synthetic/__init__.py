@@ -7,5 +7,5 @@ from .decorators import synthesizeMember, synthesize_member, \
                         namingConvention, naming_convention
 from .synthetic_meta_data import DuplicateMemberNameError
 
-__version__ = "0.3.7"
+__version__ = "0.4.0"
 
