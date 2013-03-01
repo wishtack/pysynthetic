@@ -7,13 +7,13 @@
 # $Id$
 #
 
-from .i_member_factory import IMemberFactory
+from .i_member_delegate import IMemberDelegate
 from .i_naming_convention import INamingConvention
 from .synthetic_class_controller import SyntheticClassController
 from .synthetic_member import SyntheticMember
 from contracts import contract, new_contract
 
-new_contract('IMemberFactory', IMemberFactory)
+new_contract('IMemberDelegate', IMemberDelegate)
 new_contract('INamingConvention', INamingConvention)
 new_contract('SyntheticMember', SyntheticMember)
 
@@ -26,12 +26,12 @@ class SyntheticDecoratorFactory:
                                  contract,
                                  readOnly,
                                  privateMemberName,
-                                 memberFactory):
+                                 memberDelegate):
         """
     :type memberName: str
     :type readOnly: bool
     :type privateMemberName: str|None
-    :type memberFactory: IMemberFactory
+    :type memberDelegate: IMemberDelegate
 """
         def decoratorFunction(cls):
             syntheticMember = SyntheticMember(memberName,
@@ -39,7 +39,7 @@ class SyntheticDecoratorFactory:
                                               contract,
                                               readOnly,
                                               privateMemberName,
-                                              memberFactory = memberFactory)
+                                              memberDelegate = memberDelegate)
 
             SyntheticClassController(cls).addSyntheticMember(syntheticMember)
 

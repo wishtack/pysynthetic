@@ -7,9 +7,9 @@
 # $Id$
 #
 
-from .accessor_factory import AccessorFactory
+from .accessor_delegate import AccessorDelegate
 from .i_naming_convention import INamingConvention
-from .property_factory import PropertyFactory
+from .property_delegate import PropertyDelegate
 from .naming_convention_camel_case import NamingConventionCamelCase
 from .naming_convention_underscore import NamingConventionUnderscore
 from .synthetic_decorator_factory import SyntheticDecoratorFactory
@@ -34,15 +34,15 @@ def synthesizeMember(memberName,
     :type setterName: str|None
     :type privateMemberName: str|None
 """
-    memberFactory = AccessorFactory(namingConvention = NamingConventionCamelCase(),
-                                    getterName = getterName,
-                                    setterName = setterName)
+    accessorDelegate = AccessorDelegate(namingConvention = NamingConventionCamelCase(),
+                                        getterName = getterName,
+                                        setterName = setterName)
     return SyntheticDecoratorFactory().syntheticMemberDecorator(memberName = memberName,
                                                                 defaultValue = default,
                                                                 contract = contract,
                                                                 readOnly = readOnly,
                                                                 privateMemberName = privateMemberName,
-                                                                memberFactory = memberFactory)
+                                                                memberDelegate = accessorDelegate)
 
 @contract
 def synthesize_member(member_name,
@@ -61,15 +61,15 @@ def synthesize_member(member_name,
     :type setter_name: str|None
     :type private_member_name: str|None
 """
-    memberFactory = AccessorFactory(namingConvention = NamingConventionUnderscore(),
-                                    getterName = getter_name,
-                                    setterName = setter_name)
+    accessorDelegate = AccessorDelegate(namingConvention = NamingConventionUnderscore(),
+                                       getterName = getter_name,
+                                       setterName = setter_name)
     return SyntheticDecoratorFactory().syntheticMemberDecorator(memberName = member_name,
                                                                 defaultValue = default,
                                                                 contract = contract,
                                                                 readOnly = read_only,
                                                                 privateMemberName = private_member_name,
-                                                                memberFactory = memberFactory)
+                                                                memberDelegate = accessorDelegate)
 
 @contract
 def synthesizeProperty(propertyName,
@@ -87,13 +87,13 @@ def synthesizeProperty(propertyName,
                                                                 contract = contract,
                                                                 readOnly = readOnly,
                                                                 privateMemberName = privateMemberName,
-                                                                memberFactory = PropertyFactory())
+                                                                memberDelegate = PropertyDelegate())
 @contract
 def synthesize_property(property_name,
-                       default = None,
-                       contract = None,
-                       read_only = False,
-                       private_member_name = None):
+                        default = None,
+                        contract = None,
+                        read_only = False,
+                        private_member_name = None):
     """
     :type property_name: str
     :type read_only: bool
@@ -104,7 +104,7 @@ def synthesize_property(property_name,
                                                                 contract = contract,
                                                                 readOnly = read_only,
                                                                 privateMemberName = private_member_name,
-                                                                memberFactory = PropertyFactory())
+                                                                memberDelegate = PropertyDelegate())
 
 def synthesizeConstructor():
     return SyntheticDecoratorFactory().syntheticConstructorDecorator()

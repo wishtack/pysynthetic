@@ -7,12 +7,12 @@
 # $Id$
 #
 
-from .i_member_factory import IMemberFactory
+from .i_member_delegate import IMemberDelegate
 from .i_naming_convention import INamingConvention
 from contracts import contract, new_contract, parse
 import contracts
 
-new_contract('IMemberFactory', IMemberFactory)
+new_contract('IMemberDelegate', IMemberDelegate)
 new_contract('INamingConvention', INamingConvention)
 
 class SyntheticMember:
@@ -24,12 +24,12 @@ class SyntheticMember:
                  contract,
                  readOnly,
                  privateMemberName,
-                 memberFactory):
+                 memberDelegate):
         """
     :type memberName: str
     :type readOnly: bool
     :type privateMemberName: str|None
-    :type memberFactory: IMemberFactory
+    :type memberDelegate: IMemberDelegate
 
 """
 
@@ -44,7 +44,7 @@ class SyntheticMember:
         self._contract = contract
         self._readOnly = readOnly
         self._privateMemberName = privateMemberName
-        self._memberFactory = memberFactory
+        self._memberDelegate = memberDelegate
 
 
     def memberName(self):
@@ -70,11 +70,29 @@ class SyntheticMember:
         
         self._contract._check_contract(value = value, context = {argumentName: value})
 
-    def memberDict(self, classNamingConvention):
-        return self._memberFactory.memberDict(memberName = self._memberName,
-                                       getter = self._makeGetter(),
-                                       setter = self._makeSetter(),
-                                       classNamingConvention = classNamingConvention)
+    def apply(self, cls, originalMemberNameList, classNamingConvention):
+        """
+    :type cls: type
+    :type originalMemberNameList: list(str)
+    :type classNamingConvention: INamingConvention
+"""
+        self._memberDelegate.apply(cls = cls,
+                                   originalMemberNameList = originalMemberNameList,
+                                   memberName = self._memberName,
+                                   classNamingConvention = classNamingConvention,
+                                   getter = self._makeGetter(),
+                                   setter = self._makeSetter())
+
+    def remove(self, cls, originalMemberNameList, classNamingConvention):
+        """
+    :type cls: type
+    :type originalMemberNameList: list(str)
+    :type classNamingConvention: INamingConvention
+"""
+        self._memberDelegate.remove(cls = cls,
+                                    originalMemberNameList = originalMemberNameList,
+                                    memberName = self._memberName,
+                                    classNamingConvention = classNamingConvention)
 
     def _makeGetter(self):
         def getter(instance):

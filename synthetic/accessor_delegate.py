@@ -7,13 +7,13 @@
 # $Id$
 #
 
-from .i_member_factory import IMemberFactory
+from .i_member_delegate import IMemberDelegate
 from .i_naming_convention import INamingConvention
 from contracts import new_contract
 
 new_contract('INamingConvention', INamingConvention)
 
-class AccessorFactory(IMemberFactory):
+class AccessorDelegate(IMemberDelegate):
 
     _GETTER_KEY = 'getter'
     _SETTER_KEY = 'setter'
@@ -34,16 +34,34 @@ class AccessorFactory(IMemberFactory):
         self._accessorNameDict = {self._GETTER_KEY: getterName,
                                   self._SETTER_KEY: setterName}
 
-    def memberDict(self, memberName, getter, setter, classNamingConvention):
+    def apply(self, cls, originalMemberNameList, memberName, classNamingConvention, getter, setter):
         """
+    :type cls: type
+    :type originalMemberNameList: list(str)
+    :type memberName: str
     :type classNamingConvention: INamingConvention|None
 """
+        accessorDict = self._accessorDict(memberName, classNamingConvention, getter, setter)
+        for accessorName, accessor in accessorDict.items():
+            if accessorName not in originalMemberNameList and accessor is not None:
+                setattr(cls, accessorName, accessor)
+
+    def remove(self, cls, originalMemberNameList, memberName, classNamingConvention):
+        """
+    :type cls: type
+    :type originalMemberNameList: list(str)
+    :type memberName: str
+    :type classNamingConvention: INamingConvention|None
+"""
+        accessorDict = self._accessorDict(memberName, classNamingConvention)
+        for accessorName, _ in accessorDict.items():
+            if accessorName not in originalMemberNameList and hasattr(cls, accessorName):
+                delattr(cls, accessorName)
+
+    def _accessorDict(self, memberName, classNamingConvention, getter = None, setter = None):
         resultDict = {}
         resultDict[self._accessorName(memberName, self._GETTER_KEY, classNamingConvention)] = getter
-        
-        # No setter if read only member.
-        if setter is not None:
-            resultDict[self._accessorName(memberName, self._SETTER_KEY, classNamingConvention)] = setter
+        resultDict[self._accessorName(memberName, self._SETTER_KEY, classNamingConvention)] = setter
         return resultDict
 
     def _accessorName(self, memberName, accessorName, classNamingConvention):

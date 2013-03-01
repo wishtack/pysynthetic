@@ -36,20 +36,20 @@ class TestReadOnly(object):
 class TestContract(object):
     pass
 
-@synthesizeProperty('propertyWithCustomGetterSetter')
-@synthesizeProperty('propertyWithCustomGetter')
-class TestCustomProperties(object):
+@synthesizeProperty('propertyWithOverriddenGetterSetter')
+@synthesizeProperty('propertyWithOverriddenGetter')
+class TestOverriddenProperties(object):
 
     @property
-    def propertyWithCustomGetterSetter(self):
+    def propertyWithOverriddenGetterSetter(self):
         return 'property_with_custom_getter_setter_value'
     
-    @propertyWithCustomGetterSetter.setter
-    def propertyWithCustomGetterSetter(self, value):
-        self._propertyWithCustomGetterSetter = 'property_with_custom_getter_setter_value'
+    @propertyWithOverriddenGetterSetter.setter
+    def propertyWithOverriddenGetterSetter(self, value):
+        self._propertyWithOverriddenGetterSetter = 'property_with_custom_getter_setter_value'
 
     @property
-    def propertyWithCustomGetter(self):
+    def propertyWithOverriddenGetter(self):
         return 'property_with_custom_getter_value'
 
 class TestClass(object):
@@ -87,28 +87,28 @@ class TestSynthesizeProperty(unittest.TestCase):
         with self.assertRaises(AttributeError):
             instance.readOnlyProperty = 10
     
-    def testCustomAccessors(self):
-        """If accessors are overriden, they should not be synthesized.
+    def testOverridenProperties(self):
+        """If accessors are overridden, they should not be synthesized.
 We also check that there's no bug if the naming convention is changed.
 """
-        instance = TestCustomProperties()
-        self.assertEqual(None, instance._propertyWithCustomGetterSetter)
-        self.assertEqual(None, instance._propertyWithCustomGetter)
+        instance = TestOverriddenProperties()
+        self.assertEqual(None, instance._propertyWithOverriddenGetterSetter)
+        self.assertEqual(None, instance._propertyWithOverriddenGetter)
 
         # Testing custom setters.
-        instance.propertyWithCustomGetterSetter = "placeholder"
-#@todo:        instance.propertyWithCustomGetter = "value"
+        instance.propertyWithOverriddenGetterSetter = "placeholder"
+        instance.propertyWithOverriddenGetter = "value"
         
-        self.assertEqual('property_with_custom_getter_setter_value', instance._propertyWithCustomGetterSetter)
-#@todo:        self.assertEqual('value', instance._propertyWithCustomGetter)
+        self.assertEqual('property_with_custom_getter_setter_value', instance._propertyWithOverriddenGetterSetter)
+        self.assertEqual('value', instance._propertyWithOverriddenGetter)
         
         # Testing custom getters.
-        instance = TestCustomProperties()
-        self.assertEqual(None, instance._propertyWithCustomGetterSetter)
-        self.assertEqual(None, instance._propertyWithCustomGetter)
+        instance = TestOverriddenProperties()
+        self.assertEqual(None, instance._propertyWithOverriddenGetterSetter)
+        self.assertEqual(None, instance._propertyWithOverriddenGetter)
         
-        self.assertEqual('property_with_custom_getter_setter_value', instance.propertyWithCustomGetterSetter)
-        self.assertEqual('property_with_custom_getter_value', instance.propertyWithCustomGetter)
+        self.assertEqual('property_with_custom_getter_setter_value', instance.propertyWithOverriddenGetterSetter)
+        self.assertEqual('property_with_custom_getter_value', instance.propertyWithOverriddenGetter)
 
     def testContract(self):
         instance = TestContract()
