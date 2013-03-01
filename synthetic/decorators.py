@@ -107,6 +107,9 @@ def synthesize_property(property_name,
                                                                 memberDelegate = PropertyDelegate())
 
 def synthesizeConstructor():
+    """
+    Synthesize constructor.
+"""
     return SyntheticDecoratorFactory().syntheticConstructorDecorator()
 
 
