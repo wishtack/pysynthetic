@@ -175,7 +175,7 @@ We also check that there's no bug if the naming convention is changed.
         # Checking exception message.
         try:
             instance.setMemberString(10)
-            self.fail(u"Exception not raised.")
+            self.fail("Exception not raised.")
         except ContractNotRespected as e:
             self.assertEqual("""\
 Expected type 'str', got 'int'.

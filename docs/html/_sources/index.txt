@@ -26,7 +26,7 @@ With PySynthetic, the following code *(8 lines)*...
     class ShortAndClean(object):
         pass
 
-... will replace this *(43 lines)*:
+... replaces this *(43 lines)*:
 ::
 
     from contracts import contract
@@ -130,22 +130,67 @@ This way, the following code *(8 lines)*...
         def c(self):
             return self._c
 
+Advanced usage
+**************
+
+Override synthesized member's accessors
+=======================================
+
+One can override the synthesized member's accessors by simply explicitly writing the methods.
+
+Override synthesized property
+=============================
+
+One can override the synthesized property by simply explicitly writing the properties.
+
+**Remark:** For the moment, it's impossible to override the property's setter without overriding the getter.
+
+Override synthesized constructor
+================================
+
+One can use synthesized constructors to initialize members and properties values and still override it
+to implement some additional processing.
+
+Example:
+::
+
+    @synthesize_constructor()
+    @synthesize_property('value')
+    class Double:
+        def __init__(self):
+            self._value *= 2
+
+    print(Double(10).value)
+
+Displays
+::
+
+    20
+
+The custom constructor can consume extra arguments *(not synthesized members or properties)*.
+
+For more examples, see product's unit tests.
+
 Module documentation
 ********************
 
 Underscore notation
 ===================
 
-.. automodule:: synthetic
-    :members: naming_convention, synthesize_constructor, synthesize_member, synthesize_property
+.. autofunction:: synthetic.naming_convention
+.. autofunction:: synthetic.synthesize_constructor
+.. autofunction:: synthetic.synthesize_member
+.. autofunction:: synthetic.synthesize_property
 
 CamelCase notation
 ==================
 
 Sorry Guido, but I like CamelCase.
 
-.. automodule:: synthetic
-    :members: namingConvention, synthesizeConstructor, synthesizeMember, synthesizeProperty
+.. autofunction:: synthetic.namingConvention
+.. autofunction:: synthetic.synthesizeConstructor
+.. autofunction:: synthetic.synthesizeMember
+.. autofunction:: synthetic.synthesizeProperty
 
 Indices and tables
 ******************
