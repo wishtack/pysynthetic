@@ -3,13 +3,21 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. _pysynthetic:
+
 Be synthetic with PySynthetic
 #############################
 
-@todo: ...description and motivation...
+**PySynthetic** is a set of tools that aims to make writing Python classes shorter and "cleaner".
+
+For instance, one can add properties and accessors *(getters/setters)* to a class with only one line of code *(using respectively* :meth:`synthesize_property <synthetic.synthesize_property>` *and* :meth:`synthesize_member <synthetic.synthesize_member>` *decorators)*, thus making the code :ref:`more than 5 times shorter <examples-synthetic-properties>`. One can even avoid the laborious task of members initialization by using the :meth:`synthesize_constructor <synthetic.synthesize_constructor>` decorator that takes care of writing the ``__init__`` method.
+
+**PySynthetic** is also useful for applying strict type checking with no pain just by using the decorators' ``contract`` argument *(see* `PyContracts <http://andreacensi.github.com/contracts/>`_ *)*.
 
 Examples
 ********
+
+.. _examples-synthetic-properties:
 
 Synthetic properties
 ====================

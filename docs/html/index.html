@@ -44,12 +44,14 @@
           <div class="body">
             
   <div class="section" id="be-synthetic-with-pysynthetic">
-<h1>Be synthetic with PySynthetic<a class="headerlink" href="#be-synthetic-with-pysynthetic" title="Permalink to this headline">¶</a></h1>
-<p>&#64;todo: ...description and motivation...</p>
+<span id="pysynthetic"></span><h1>Be synthetic with PySynthetic<a class="headerlink" href="#be-synthetic-with-pysynthetic" title="Permalink to this headline">¶</a></h1>
+<p><strong>PySynthetic</strong> is a set of tools that aims to make writing Python classes shorter and &#8220;cleaner&#8221;.</p>
+<p>For instance, one can add properties and accessors <em>(getters/setters)</em> to a class with only one line of code <em>(using respectively</em> <a class="reference internal" href="#synthetic.synthesize_property" title="synthetic.synthesize_property"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_property</span></tt></a> <em>and</em> <a class="reference internal" href="#synthetic.synthesize_member" title="synthetic.synthesize_member"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_member</span></tt></a> <em>decorators)</em>, thus making the code <a class="reference internal" href="#examples-synthetic-properties"><em>more than 5 times shorter</em></a>. One can even avoid the laborious task of members initialization by using the <a class="reference internal" href="#synthetic.synthesize_constructor" title="synthetic.synthesize_constructor"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_constructor</span></tt></a> decorator that takes care of writing the <tt class="docutils literal"><span class="pre">__init__</span></tt> method.</p>
+<p><strong>PySynthetic</strong> is also useful for applying strict type checking with no pain just by using the decorators&#8217; <tt class="docutils literal"><span class="pre">contract</span></tt> argument <em>(see</em> <a class="reference external" href="http://andreacensi.github.com/contracts/">PyContracts</a> <em>)</em>.</p>
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="synthetic-properties">
-<h3>Synthetic properties<a class="headerlink" href="#synthetic-properties" title="Permalink to this headline">¶</a></h3>
+<span id="examples-synthetic-properties"></span><h3>Synthetic properties<a class="headerlink" href="#synthetic-properties" title="Permalink to this headline">¶</a></h3>
 <p>With PySynthetic, the following code <em>(8 lines)</em>...</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">synthetic</span> <span class="kn">import</span> <span class="n">synthesize_constructor</span><span class="p">,</span> <span class="n">synthesize_property</span>
 
@@ -241,7 +243,8 @@ to implement some additional processing.</p>
 <li><strong>read_only</strong> (<tt class="docutils literal"><span class="pre">bool</span></tt>) &#8211; If set to <tt class="docutils literal"><span class="pre">True</span></tt>, the setter will not be added to the class.</li>
 <li><strong>default</strong> (<tt class="docutils literal"><span class="pre">*</span></tt>) &#8211; Member&#8217;s default value.</li>
 <li><strong>getter_name</strong> (<tt class="docutils literal"><span class="pre">str|None</span></tt>) &#8211; Custom getter name. This can be useful when the member is a boolean. (Ex.: <tt class="docutils literal"><span class="pre">is_alive</span></tt>)</li>
-<li><strong>contract</strong> (<tt class="docutils literal"><span class="pre">*</span></tt>) &#8211; Type constraint. See <a class="reference external" href="http://andreacensi.github.com/contracts/">PyContracts</a></li>
+<li><strong>contract</strong> (<tt class="docutils literal"><span class="pre">*</span></tt>) &#8211; <p>Type constraint. See <a class="reference external" href="http://andreacensi.github.com/contracts/">PyContracts</a></p>
+</li>
 <li><strong>setter_name</strong> (<tt class="docutils literal"><span class="pre">str|None</span></tt>) &#8211; Custom setter name.</li>
 <li><strong>member_name</strong> (<tt class="docutils literal"><span class="pre">str</span></tt>) &#8211; Name of the member to synthesize.</li>
 <li><strong>private_member_name</strong> (<tt class="docutils literal"><span class="pre">str|None</span></tt>) &#8211; Custom name for the private attribute that contains the member&#8217;s value.</li>
