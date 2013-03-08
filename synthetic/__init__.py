@@ -11,5 +11,5 @@ __all__ = ['DuplicateMemberNameError', 'INamingConvention', 'NamingConventionCam
            'namingConvention', 'synthesizeConstructor', 'synthesizeMember', 'synthesizeProperty',
            'naming_convention', 'synthesize_constructor', 'synthesize_member', 'synthesize_property']
 
-__version__ = "0.4.0"
+__version__ = "0.4.1"
 
