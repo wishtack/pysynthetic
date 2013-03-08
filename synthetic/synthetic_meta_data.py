@@ -21,8 +21,8 @@ class DuplicateMemberNameError(Exception):
     :type memberName: str
     :type className: str
 """
-        super(DuplicateMemberNameError, self).__init__(u"Duplicate member name '%s' for class '%s'." % (memberName,
-                                                                                                        className))
+        super(DuplicateMemberNameError, self).__init__("Duplicate member name '%s' for class '%s'." % (memberName,
+                                                                                                       className))
 class SyntheticMetaData:
 
     def __init__(self, cls, originalConstructor, originalMemberNameList):

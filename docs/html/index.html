@@ -1,0 +1,461 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Be synthetic with PySynthetic &mdash; PySynthetic 0.4.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.4.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PySynthetic 0.4.0 documentation" href="#" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="#">PySynthetic 0.4.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="be-synthetic-with-pysynthetic">
+<span id="pysynthetic"></span><h1>Be synthetic with PySynthetic<a class="headerlink" href="#be-synthetic-with-pysynthetic" title="Permalink to this headline">¶</a></h1>
+<p><strong>PySynthetic</strong> is a set of tools that aims to make writing Python classes shorter and &#8220;cleaner&#8221;.</p>
+<p>For instance, one can add properties and accessors <em>(getters/setters)</em> to a class with only one line of code <em>(using respectively</em> <a class="reference internal" href="#synthetic.synthesize_property" title="synthetic.synthesize_property"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_property</span></tt></a> <em>and</em> <a class="reference internal" href="#synthetic.synthesize_member" title="synthetic.synthesize_member"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_member</span></tt></a> <em>decorators)</em>, thus making the code <a class="reference internal" href="#examples-synthetic-properties"><em>more than 5 times shorter</em></a>. One can even avoid the laborious task of members initialization by using the <a class="reference internal" href="#synthetic.synthesize_constructor" title="synthetic.synthesize_constructor"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_constructor</span></tt></a> decorator that takes care of writing the <tt class="docutils literal"><span class="pre">__init__</span></tt> method.</p>
+<p><strong>PySynthetic</strong> is also useful for applying strict type checking with no pain just by using the decorators&#8217; <tt class="docutils literal"><span class="pre">contract</span></tt> argument <em>(see</em> <a class="reference external" href="http://andreacensi.github.com/contracts/">PyContracts</a> <em>)</em>.</p>
+<div class="section" id="examples">
+<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="synthetic-properties">
+<span id="examples-synthetic-properties"></span><h3>Synthetic properties<a class="headerlink" href="#synthetic-properties" title="Permalink to this headline">¶</a></h3>
+<p>With PySynthetic, the following code <em>(8 lines)</em>...</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">synthetic</span> <span class="kn">import</span> <span class="n">synthesize_constructor</span><span class="p">,</span> <span class="n">synthesize_property</span>
+
+<span class="nd">@synthesize_property</span><span class="p">(</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="n">contract</span> <span class="o">=</span> <span class="nb">int</span><span class="p">)</span>
+<span class="nd">@synthesize_property</span><span class="p">(</span><span class="s">&#39;b&#39;</span><span class="p">,</span> <span class="n">contract</span> <span class="o">=</span> <span class="nb">list</span><span class="p">)</span>
+<span class="nd">@synthesize_property</span><span class="p">(</span><span class="s">&#39;c&#39;</span><span class="p">,</span> <span class="n">default</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">contract</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">read_only</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+<span class="nd">@synthesize_constructor</span><span class="p">()</span>
+<span class="k">class</span> <span class="nc">ShortAndClean</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>... replaces this <em>(43 lines)</em>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">contracts</span> <span class="kn">import</span> <span class="n">contract</span>
+
+<span class="k">class</span> <span class="nc">ThisHurtsMyKeyboard</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="nd">@contract</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :type a: int</span>
+<span class="sd">    :type b: list</span>
+<span class="sd">    :type c: str</span>
+<span class="sd">&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">=</span> <span class="n">a</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="n">b</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_c</span> <span class="o">=</span> <span class="n">c</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a</span>
+
+    <span class="nd">@a.setter</span>
+    <span class="nd">@contract</span>
+    <span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :type value: int</span>
+<span class="sd">&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">b</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span>
+
+    <span class="nd">@b.setter</span>
+    <span class="nd">@contract</span>
+    <span class="k">def</span> <span class="nf">b</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :type value: list</span>
+<span class="sd">&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_c</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="synthetic-accessors">
+<h3>Synthetic accessors<a class="headerlink" href="#synthetic-accessors" title="Permalink to this headline">¶</a></h3>
+<p>But, if you are more into accessors than properties, you can use <a class="reference internal" href="#synthetic.synthesize_member" title="synthetic.synthesize_member"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_member</span></tt></a> decorator instead.</p>
+<p>This way, the following code <em>(8 lines)</em>...</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">synthetic</span> <span class="kn">import</span> <span class="n">synthesize_constructor</span><span class="p">,</span> <span class="n">synthesize_member</span>
+
+<span class="nd">@synthesize_member</span><span class="p">(</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="n">contract</span> <span class="o">=</span> <span class="nb">int</span><span class="p">)</span>
+<span class="nd">@synthesize_member</span><span class="p">(</span><span class="s">&#39;b&#39;</span><span class="p">,</span> <span class="n">contract</span> <span class="o">=</span> <span class="nb">list</span><span class="p">)</span>
+<span class="nd">@synthesize_member</span><span class="p">(</span><span class="s">&#39;c&#39;</span><span class="p">,</span> <span class="n">default</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">contract</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">read_only</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+<span class="nd">@synthesize_constructor</span><span class="p">()</span>
+<span class="k">class</span> <span class="nc">ShortAndClean</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<p>...will replace this <em>(37 lines)</em>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">contracts</span> <span class="kn">import</span> <span class="n">contract</span>
+
+<span class="k">class</span> <span class="nc">ThisHurtsMyKeyboard</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="nd">@contract</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :type a: int</span>
+<span class="sd">    :type b: list</span>
+<span class="sd">    :type c: str</span>
+<span class="sd">&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">=</span> <span class="n">a</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="n">b</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_c</span> <span class="o">=</span> <span class="n">c</span>
+
+    <span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a</span>
+
+    <span class="nd">@contract</span>
+    <span class="k">def</span> <span class="nf">set_a</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :type value: int</span>
+<span class="sd">&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">b</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span>
+
+    <span class="nd">@contract</span>
+    <span class="k">def</span> <span class="nf">set_b</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    :type value: list</span>
+<span class="sd">&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_c</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="advanced-usage">
+<h2>Advanced usage<a class="headerlink" href="#advanced-usage" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="override-synthesized-member-s-accessors">
+<h3>Override synthesized member&#8217;s accessors<a class="headerlink" href="#override-synthesized-member-s-accessors" title="Permalink to this headline">¶</a></h3>
+<p>One can override the synthesized member&#8217;s accessors by simply explicitly writing the methods.</p>
+</div>
+<div class="section" id="override-synthesized-property">
+<h3>Override synthesized property<a class="headerlink" href="#override-synthesized-property" title="Permalink to this headline">¶</a></h3>
+<p>One can override the synthesized property by simply explicitly writing the properties.</p>
+<p><strong>Remark:</strong> For the moment, it&#8217;s impossible to override the property&#8217;s setter without overriding the getter.</p>
+</div>
+<div class="section" id="override-synthesized-constructor">
+<h3>Override synthesized constructor<a class="headerlink" href="#override-synthesized-constructor" title="Permalink to this headline">¶</a></h3>
+<p>One can use synthesized constructors to initialize members and properties values and still override it
+to implement some additional processing.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@synthesize_constructor</span><span class="p">()</span>
+<span class="nd">@synthesize_property</span><span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Double</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">*=</span> <span class="mi">2</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">Double</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Displays</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="mi">20</span>
+</pre></div>
+</div>
+<p>The custom constructor can consume extra arguments <em>(not synthesized members or properties)</em>.</p>
+<p>For more examples, see product&#8217;s unit tests.</p>
+</div>
+</div>
+<div class="section" id="module-documentation">
+<h2>Module documentation<a class="headerlink" href="#module-documentation" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="underscore-notation">
+<h3>Underscore notation<a class="headerlink" href="#underscore-notation" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="synthetic.naming_convention">
+<tt class="descclassname">synthetic.</tt><tt class="descname">naming_convention</tt><big>(</big><em>naming_convention</em><big>)</big><a class="headerlink" href="#synthetic.naming_convention" title="Permalink to this definition">¶</a></dt>
+<dd><p>When applied to a class, this decorator will override the underscore naming convention of all (previous and following)
+<tt class="xref py py-meth docutils literal"><span class="pre">synthesizeMember()</span></tt> calls on the class to <tt class="docutils literal"><span class="pre">naming_convention</span></tt>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>naming_convention</strong> (<em>INamingConvention</em>) &#8211; The new naming convention.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="synthetic.synthesize_constructor">
+<tt class="descclassname">synthetic.</tt><tt class="descname">synthesize_constructor</tt><big>(</big><big>)</big><a class="headerlink" href="#synthetic.synthesize_constructor" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class decorator will override the class&#8217;s constructor by making it    implicitly consume values for synthesized members and properties.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="synthetic.synthesize_member">
+<tt class="descclassname">synthetic.</tt><tt class="descname">synthesize_member</tt><big>(</big><em>member_name</em>, <em>default=None</em>, <em>contract=None</em>, <em>read_only=False</em>, <em>getter_name=None</em>, <em>setter_name=None</em>, <em>private_member_name=None</em><big>)</big><a class="headerlink" href="#synthetic.synthesize_member" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>When applied to a class, this decorator adds getter/setter methods to it and overrides the constructor in order to set    the default value of the member.</dt>
+<dd><p class="first">By default, the getter will be named <tt class="docutils literal"><span class="pre">member_name</span></tt>. (Ex.: <tt class="docutils literal"><span class="pre">member_name</span> <span class="pre">=</span> <span class="pre">'member'</span> <span class="pre">=&gt;</span> <span class="pre">instance.member()</span></tt>)</p>
+<p>By default, the setter will be named <tt class="docutils literal"><span class="pre">member_name</span></tt> with &#8216;set_&#8217; prepended it to it.
+(Ex.: <tt class="docutils literal"><span class="pre">member_name</span> <span class="pre">=</span> <span class="pre">'member'</span> <span class="pre">=&gt;</span> <span class="pre">instance.set_member(...)</span></tt>)</p>
+<p>By default, the private attribute containing the member&#8217;s value will be named <tt class="docutils literal"><span class="pre">member_name</span></tt> with &#8216;_&#8217; prepended to it.</p>
+<p class="last">Naming convention can be overridden with a custom one using <tt class="xref py py-meth docutils literal"><span class="pre">naming_convention</span></tt> decorator.</p>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>read_only</strong> (<tt class="docutils literal"><span class="pre">bool</span></tt>) &#8211; If set to <tt class="docutils literal"><span class="pre">True</span></tt>, the setter will not be added to the class.</li>
+<li><strong>default</strong> (<tt class="docutils literal"><span class="pre">*</span></tt>) &#8211; Member&#8217;s default value.</li>
+<li><strong>getter_name</strong> (<tt class="docutils literal"><span class="pre">str|None</span></tt>) &#8211; Custom getter name. This can be useful when the member is a boolean. (Ex.: <tt class="docutils literal"><span class="pre">is_alive</span></tt>)</li>
+<li><strong>contract</strong> (<tt class="docutils literal"><span class="pre">*</span></tt>) &#8211; <p>Type constraint. See <a class="reference external" href="http://andreacensi.github.com/contracts/">PyContracts</a></p>
+</li>
+<li><strong>setter_name</strong> (<tt class="docutils literal"><span class="pre">str|None</span></tt>) &#8211; Custom setter name.</li>
+<li><strong>member_name</strong> (<tt class="docutils literal"><span class="pre">str</span></tt>) &#8211; Name of the member to synthesize.</li>
+<li><strong>private_member_name</strong> (<tt class="docutils literal"><span class="pre">str|None</span></tt>) &#8211; Custom name for the private attribute that contains the member&#8217;s value.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="synthetic.synthesize_property">
+<tt class="descclassname">synthetic.</tt><tt class="descname">synthesize_property</tt><big>(</big><em>property_name</em>, <em>default=None</em>, <em>contract=None</em>, <em>read_only=False</em>, <em>private_member_name=None</em><big>)</big><a class="headerlink" href="#synthetic.synthesize_property" title="Permalink to this definition">¶</a></dt>
+<dd><p>When applied to a class, this decorator adds a property to it and overrides the constructor in order to set    the default value of the property.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">IMPORTANT:</th><td class="field-body">In order for this to work on python 2, you must use new objects that is to say that the class must inherit from object.</td>
+</tr>
+</tbody>
+</table>
+<p>By default, the private attribute containing the property&#8217;s value will be named <tt class="docutils literal"><span class="pre">property_name</span></tt> with &#8216;_&#8217; prepended to it.</p>
+<p>Naming convention can be overridden with a custom one using <tt class="xref py py-meth docutils literal"><span class="pre">naming_convention</span></tt> decorator.</p>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>default</strong> (<tt class="docutils literal"><span class="pre">*</span></tt>) &#8211; Property&#8217;s default value.</li>
+<li><strong>read_only</strong> (<tt class="docutils literal"><span class="pre">bool</span></tt>) &#8211; If set to <tt class="docutils literal"><span class="pre">True</span></tt>, the property will not a have a setter.</li>
+<li><strong>private_member_name</strong> (<tt class="docutils literal"><span class="pre">str|None</span></tt>) &#8211; Custom name for the private attribute that contains the property&#8217;s value.</li>
+<li><strong>contract</strong> (<tt class="docutils literal"><span class="pre">*</span></tt>) &#8211; <p>Type constraint. See <a class="reference external" href="http://andreacensi.github.com/contracts/">PyContracts</a></p>
+</li>
+<li><strong>property_name</strong> (<tt class="docutils literal"><span class="pre">str</span></tt>) &#8211; Name of the property to synthesize.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="camelcase-notation">
+<h3>CamelCase notation<a class="headerlink" href="#camelcase-notation" title="Permalink to this headline">¶</a></h3>
+<p>Sorry Guido, but I like CamelCase.</p>
+<dl class="function">
+<dt id="synthetic.namingConvention">
+<tt class="descclassname">synthetic.</tt><tt class="descname">namingConvention</tt><big>(</big><em>namingConvention</em><big>)</big><a class="headerlink" href="#synthetic.namingConvention" title="Permalink to this definition">¶</a></dt>
+<dd><p>When applied to a class, this decorator will override the CamelCase naming convention of all (previous and following)
+<tt class="xref py py-meth docutils literal"><span class="pre">synthesizeMember()</span></tt> calls on the class to <tt class="docutils literal"><span class="pre">namingConvention</span></tt>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>namingConvention</strong> (<em>INamingConvention</em>) &#8211; The new naming convention.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="synthetic.synthesizeConstructor">
+<tt class="descclassname">synthetic.</tt><tt class="descname">synthesizeConstructor</tt><big>(</big><big>)</big><a class="headerlink" href="#synthetic.synthesizeConstructor" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class decorator will override the class&#8217;s constructor by making it    implicitly consume values for synthesized members and properties.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="synthetic.synthesizeMember">
+<tt class="descclassname">synthetic.</tt><tt class="descname">synthesizeMember</tt><big>(</big><em>memberName</em>, <em>default=None</em>, <em>contract=None</em>, <em>readOnly=False</em>, <em>getterName=None</em>, <em>setterName=None</em>, <em>privateMemberName=None</em><big>)</big><a class="headerlink" href="#synthetic.synthesizeMember" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>When applied to a class, this decorator adds getter/setter methods to it and overrides the constructor in order to set    the default value of the member.</dt>
+<dd><p class="first">By default, the getter will be named <tt class="docutils literal"><span class="pre">memberName</span></tt>. (Ex.: <tt class="docutils literal"><span class="pre">memberName</span> <span class="pre">=</span> <span class="pre">'member'</span> <span class="pre">=&gt;</span> <span class="pre">instance.member()</span></tt>)</p>
+<p>By default, the setter will be named <tt class="docutils literal"><span class="pre">memberName</span></tt> with the first letter capitalized and &#8216;set&#8217; prepended it to it.
+(Ex.: <tt class="docutils literal"><span class="pre">memberName</span> <span class="pre">=</span> <span class="pre">&quot;member&quot;</span> <span class="pre">=&gt;</span> <span class="pre">instance.setMember(...)</span></tt>)</p>
+<p>By default, the private attribute containing the member&#8217;s value will be named <tt class="docutils literal"><span class="pre">memberName</span></tt> with &#8216;_&#8217; prepended to it.</p>
+<p class="last">Naming convention can be overridden with a custom one using <tt class="xref py py-meth docutils literal"><span class="pre">namingConvention</span></tt> decorator.</p>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>privateMemberName</strong> (<tt class="docutils literal"><span class="pre">str|None</span></tt>) &#8211; Custom name for the private attribute that contains the member&#8217;s value.</li>
+<li><strong>default</strong> (<tt class="docutils literal"><span class="pre">*</span></tt>) &#8211; Member&#8217;s default value.</li>
+<li><strong>memberName</strong> (<tt class="docutils literal"><span class="pre">str</span></tt>) &#8211; Name of the member to synthesize.</li>
+<li><strong>contract</strong> (<tt class="docutils literal"><span class="pre">*</span></tt>) &#8211; <p>Type constraint. See <a class="reference external" href="http://andreacensi.github.com/contracts/">PyContracts</a></p>
+</li>
+<li><strong>readOnly</strong> (<tt class="docutils literal"><span class="pre">bool</span></tt>) &#8211; If set to <tt class="docutils literal"><span class="pre">True</span></tt>, the setter will not be added to the class.</li>
+<li><strong>setterName</strong> (<tt class="docutils literal"><span class="pre">str|None</span></tt>) &#8211; Custom setter name.</li>
+<li><strong>getterName</strong> (<tt class="docutils literal"><span class="pre">str|None</span></tt>) &#8211; Custom getter name. This can be useful when the member is a boolean. (Ex.: <tt class="docutils literal"><span class="pre">isAlive</span></tt>)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="synthetic.synthesizeProperty">
+<tt class="descclassname">synthetic.</tt><tt class="descname">synthesizeProperty</tt><big>(</big><em>propertyName</em>, <em>default=None</em>, <em>contract=None</em>, <em>readOnly=False</em>, <em>privateMemberName=None</em><big>)</big><a class="headerlink" href="#synthetic.synthesizeProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>When applied to a class, this decorator adds a property to it and overrides the constructor in order to set    the default value of the property.</p>
+<blockquote>
+<div><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">IMPORTANT:</th><td class="field-body">In order for this to work on python 2, you must use new objects that is to say that the class must inherit from object.</td>
+</tr>
+</tbody>
+</table>
+<p>By default, the private attribute containing the property&#8217;s value will be named <tt class="docutils literal"><span class="pre">propertyName</span></tt> with &#8216;_&#8217; prepended to it.</p>
+<p>Naming convention can be overridden with a custom one using <tt class="xref py py-meth docutils literal"><span class="pre">namingConvention</span></tt> decorator.</p>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>default</strong> (<tt class="docutils literal"><span class="pre">*</span></tt>) &#8211; Property&#8217;s default value.</li>
+<li><strong>propertyName</strong> (<tt class="docutils literal"><span class="pre">str</span></tt>) &#8211; Name of the property to synthesize.</li>
+<li><strong>readOnly</strong> (<tt class="docutils literal"><span class="pre">bool</span></tt>) &#8211; If set to <tt class="docutils literal"><span class="pre">True</span></tt>, the property will not a have a setter.</li>
+<li><strong>contract</strong> (<tt class="docutils literal"><span class="pre">*</span></tt>) &#8211; <p>Type constraint. See <a class="reference external" href="http://andreacensi.github.com/contracts/">PyContracts</a></p>
+</li>
+<li><strong>privateMemberName</strong> (<tt class="docutils literal"><span class="pre">str|None</span></tt>) &#8211; Custom name for the private attribute that contains the property&#8217;s value.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Be synthetic with PySynthetic</a><ul>
+<li><a class="reference internal" href="#examples">Examples</a><ul>
+<li><a class="reference internal" href="#synthetic-properties">Synthetic properties</a></li>
+<li><a class="reference internal" href="#synthetic-accessors">Synthetic accessors</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#advanced-usage">Advanced usage</a><ul>
+<li><a class="reference internal" href="#override-synthesized-member-s-accessors">Override synthesized member&#8217;s accessors</a></li>
+<li><a class="reference internal" href="#override-synthesized-property">Override synthesized property</a></li>
+<li><a class="reference internal" href="#override-synthesized-constructor">Override synthesized constructor</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-documentation">Module documentation</a><ul>
+<li><a class="reference internal" href="#underscore-notation">Underscore notation</a></li>
+<li><a class="reference internal" href="#camelcase-notation">CamelCase notation</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="#">PySynthetic 0.4.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Younes JAAIDI.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
