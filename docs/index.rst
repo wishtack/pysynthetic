@@ -10,7 +10,7 @@ Be synthetic with PySynthetic
 
 **PySynthetic** is a set of tools that aims to make writing Python classes shorter and "cleaner".
 
-For instance, one can add properties and accessors *(getters/setters)* to a class with only one line of code *(using respectively* :meth:`synthesize_property <synthetic.synthesize_property>` *and* :meth:`synthesize_member <synthetic.synthesize_member>` *decorators)*, thus making the code `more than 5 times shorter <synthetic-properties>`_. One can even avoid the laborious task of members initialization by using the :meth:`synthesize_constructor <synthetic.synthesize_constructor>` decorator that takes care of writing the ``__init__`` method.
+For instance, one can add properties and accessors *(getters/setters)* to a class with only one line of code *(using respectively* ``synthesize_property`` *and* ``synthesize_member`` *decorators)*, thus making the code `more than 5 times shorter <synthetic-properties>`_. One can even avoid the laborious task of members initialization by using the ``synthesize_constructor`` decorator that takes care of writing the ``__init__`` method.
 
 **PySynthetic** is also useful for applying strict type checking with no pain just by using the decorators' ``contract`` argument *(see* `PyContracts <http://andreacensi.github.com/contracts/>`_ *)*.
 
