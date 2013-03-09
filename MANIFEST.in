@@ -1,0 +1,5 @@
+recursive-include tests *.py *.c *.pyx *.txt
+recursive-include docs *
+include LICENSE.txt
+include MANIFEST.in
+include README.rst

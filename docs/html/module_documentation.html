@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Be synthetic with PySynthetic &mdash; PySynthetic 0.4.5 documentation</title>
+    <title>Module documentation &mdash; PySynthetic 0.4.5 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PySynthetic 0.4.5 documentation" href="#" /> 
+    <link rel="top" title="PySynthetic 0.4.5 documentation" href="index.html" /> 
   </head>
   <body>
     <div class="related">
@@ -34,7 +34,7 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li><a href="#">PySynthetic 0.4.5 documentation</a> &raquo;</li> 
+        <li><a href="index.html">PySynthetic 0.4.5 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -43,177 +43,10 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="be-synthetic-with-pysynthetic">
-<h1>Be synthetic with PySynthetic<a class="headerlink" href="#be-synthetic-with-pysynthetic" title="Permalink to this headline">¶</a></h1>
-<p><strong>PySynthetic</strong> is a set of tools that aims to make writing Python classes shorter and &#8220;cleaner&#8221;.</p>
-<p>For instance, one can add properties and accessors <em>(getters/setters)</em> to a class with only one line of code <em>(using respectively</em> <a class="reference internal" href="#synthetic.synthesize_property" title="synthetic.synthesize_property"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_property</span></tt></a> <em>and</em> <a class="reference internal" href="#synthetic.synthesize_member" title="synthetic.synthesize_member"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_member</span></tt></a> <em>decorators)</em>, thus making the code more than 5 times shorter <em>(see</em> <a class="reference internal" href="#examples">examples</a> <em>)</em>. One can even avoid the laborious task of members initialization by using the <a class="reference internal" href="#synthetic.synthesize_constructor" title="synthetic.synthesize_constructor"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_constructor</span></tt></a> decorator that takes care of writing the <tt class="docutils literal"><span class="pre">__init__</span></tt> method.</p>
-<p><strong>PySynthetic</strong> is also useful for applying strict type checking with no pain just by using the decorators&#8217; <tt class="docutils literal"><span class="pre">contract</span></tt> argument <em>(see</em> <a class="reference external" href="http://andreacensi.github.com/contracts/">PyContracts</a> <em>)</em>.</p>
-<p>Help and ideas are appreciated! Thank you!</p>
-<a class="reference external image-reference" href="https://flattr.com/thing/1167227/"><img alt="https://api.flattr.com/button/flattr-badge-large.png" src="https://api.flattr.com/button/flattr-badge-large.png" /></a>
-<a class="reference external image-reference" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=yjaaidi%40gmail%2ecom&amp;lc=US&amp;item_name=yjaaidi&amp;currency_code=EUR&amp;bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted"><img alt="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" /></a>
-<div class="section" id="resources">
-<h2>Resources<a class="headerlink" href="#resources" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><a class="reference external" href="http://pysynthetic.readthedocs.org/">Documentation</a></li>
-<li><a class="reference external" href="http://github.com/yjaaidi/pysynthetic/issues">Bug Tracker</a></li>
-<li><a class="reference external" href="http://github.com/yjaaidi/pysynthetic">Code</a></li>
-<li><a class="reference external" href="https://groups.google.com/group/pysynthetic">Mailing List</a> &lt;<a class="reference external" href="mailto:pysynthetic&#37;&#52;&#48;googlegroups&#46;com">pysynthetic<span>&#64;</span>googlegroups<span>&#46;</span>com</a>&gt;</li>
-</ul>
-</div>
-<div class="section" id="examples">
-<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="synthetic-properties">
-<h3>Synthetic properties<a class="headerlink" href="#synthetic-properties" title="Permalink to this headline">¶</a></h3>
-<p>With <strong>PySynthetic</strong>, the following code <em>(8 lines)</em>...</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">synthetic</span> <span class="kn">import</span> <span class="n">synthesize_constructor</span><span class="p">,</span> <span class="n">synthesize_property</span>
-
-<span class="nd">@synthesize_property</span><span class="p">(</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="n">contract</span> <span class="o">=</span> <span class="nb">int</span><span class="p">)</span>
-<span class="nd">@synthesize_property</span><span class="p">(</span><span class="s">&#39;b&#39;</span><span class="p">,</span> <span class="n">contract</span> <span class="o">=</span> <span class="nb">list</span><span class="p">)</span>
-<span class="nd">@synthesize_property</span><span class="p">(</span><span class="s">&#39;c&#39;</span><span class="p">,</span> <span class="n">default</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">contract</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">read_only</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
-<span class="nd">@synthesize_constructor</span><span class="p">()</span>
-<span class="k">class</span> <span class="nc">ShortAndClean</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">pass</span>
-</pre></div>
-</div>
-<p>... replaces this <em>(43 lines)</em>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">contracts</span> <span class="kn">import</span> <span class="n">contract</span>
-
-<span class="k">class</span> <span class="nc">ThisHurtsMyKeyboard</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-
-    <span class="nd">@contract</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    :type a: int</span>
-<span class="sd">    :type b: list</span>
-<span class="sd">    :type c: str</span>
-<span class="sd">&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">=</span> <span class="n">a</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="n">b</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_c</span> <span class="o">=</span> <span class="n">c</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a</span>
-
-    <span class="nd">@a.setter</span>
-    <span class="nd">@contract</span>
-    <span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    :type value: int</span>
-<span class="sd">&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">=</span> <span class="n">value</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">b</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span>
-
-    <span class="nd">@b.setter</span>
-    <span class="nd">@contract</span>
-    <span class="k">def</span> <span class="nf">b</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    :type value: list</span>
-<span class="sd">&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="n">value</span>
-
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_c</span>
-</pre></div>
-</div>
-</div>
-<div class="section" id="synthetic-accessors">
-<h3>Synthetic accessors<a class="headerlink" href="#synthetic-accessors" title="Permalink to this headline">¶</a></h3>
-<p>But, if you are more into accessors than properties, you can use <a class="reference internal" href="#synthetic.synthesize_member" title="synthetic.synthesize_member"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_member</span></tt></a> decorator instead.</p>
-<p>This way, the following code <em>(8 lines)</em>...</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">synthetic</span> <span class="kn">import</span> <span class="n">synthesize_constructor</span><span class="p">,</span> <span class="n">synthesize_member</span>
-
-<span class="nd">@synthesize_member</span><span class="p">(</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="n">contract</span> <span class="o">=</span> <span class="nb">int</span><span class="p">)</span>
-<span class="nd">@synthesize_member</span><span class="p">(</span><span class="s">&#39;b&#39;</span><span class="p">,</span> <span class="n">contract</span> <span class="o">=</span> <span class="nb">list</span><span class="p">)</span>
-<span class="nd">@synthesize_member</span><span class="p">(</span><span class="s">&#39;c&#39;</span><span class="p">,</span> <span class="n">default</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">,</span> <span class="n">contract</span> <span class="o">=</span> <span class="nb">str</span><span class="p">,</span> <span class="n">read_only</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
-<span class="nd">@synthesize_constructor</span><span class="p">()</span>
-<span class="k">class</span> <span class="nc">ShortAndClean</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">pass</span>
-</pre></div>
-</div>
-<p>...will replace this <em>(37 lines)</em>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">contracts</span> <span class="kn">import</span> <span class="n">contract</span>
-
-<span class="k">class</span> <span class="nc">ThisHurtsMyKeyboard</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-
-    <span class="nd">@contract</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="s">&quot;&quot;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    :type a: int</span>
-<span class="sd">    :type b: list</span>
-<span class="sd">    :type c: str</span>
-<span class="sd">&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">=</span> <span class="n">a</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="n">b</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_c</span> <span class="o">=</span> <span class="n">c</span>
-
-    <span class="k">def</span> <span class="nf">a</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_a</span>
-
-    <span class="nd">@contract</span>
-    <span class="k">def</span> <span class="nf">set_a</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    :type value: int</span>
-<span class="sd">&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_a</span> <span class="o">=</span> <span class="n">value</span>
-
-    <span class="k">def</span> <span class="nf">b</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_b</span>
-
-    <span class="nd">@contract</span>
-    <span class="k">def</span> <span class="nf">set_b</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    :type value: list</span>
-<span class="sd">&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="n">value</span>
-
-    <span class="k">def</span> <span class="nf">c</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_c</span>
-</pre></div>
-</div>
-</div>
-</div>
-<div class="section" id="advanced-usage">
-<h2>Advanced usage<a class="headerlink" href="#advanced-usage" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="override-synthesized-member-s-accessors">
-<h3>Override synthesized member&#8217;s accessors<a class="headerlink" href="#override-synthesized-member-s-accessors" title="Permalink to this headline">¶</a></h3>
-<p>One can override the synthesized member&#8217;s accessors by simply explicitly writing the methods.</p>
-</div>
-<div class="section" id="override-synthesized-property">
-<h3>Override synthesized property<a class="headerlink" href="#override-synthesized-property" title="Permalink to this headline">¶</a></h3>
-<p>One can override the synthesized property by simply explicitly writing the properties.</p>
-<p><strong>Remark:</strong> For the moment, it&#8217;s impossible to override the property&#8217;s setter without overriding the getter.</p>
-</div>
-<div class="section" id="override-synthesized-constructor">
-<h3>Override synthesized constructor<a class="headerlink" href="#override-synthesized-constructor" title="Permalink to this headline">¶</a></h3>
-<p>One can use synthesized constructors to initialize members and properties values and still override it
-to implement some additional processing.</p>
-<p>Example:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="nd">@synthesize_constructor</span><span class="p">()</span>
-<span class="nd">@synthesize_property</span><span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">)</span>
-<span class="k">class</span> <span class="nc">Double</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">*=</span> <span class="mi">2</span>
-
-<span class="k">print</span><span class="p">(</span><span class="n">Double</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Displays</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="mi">20</span>
-</pre></div>
-</div>
-<p>The custom constructor can consume extra arguments <em>(not synthesized members or properties)</em>.</p>
-<p>For more examples, see product&#8217;s unit tests.</p>
-</div>
-</div>
-<div class="section" id="module-documentation">
-<h2>Module documentation<a class="headerlink" href="#module-documentation" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="module-documentation">
+<h1>Module documentation<a class="headerlink" href="#module-documentation" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="underscore-notation">
-<h3>Underscore notation<a class="headerlink" href="#underscore-notation" title="Permalink to this headline">¶</a></h3>
+<h2>Underscore notation<a class="headerlink" href="#underscore-notation" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="synthetic.naming_convention">
 <tt class="descclassname">synthetic.</tt><tt class="descname">naming_convention</tt><big>(</big><em>naming_convention</em><big>)</big><a class="headerlink" href="#synthetic.naming_convention" title="Permalink to this definition">¶</a></dt>
@@ -263,8 +96,7 @@ to implement some additional processing.</p>
 <li><strong>read_only</strong> (<tt class="docutils literal"><span class="pre">bool</span></tt>) &#8211; If set to <tt class="docutils literal"><span class="pre">True</span></tt>, the setter will not be added to the class.</li>
 <li><strong>default</strong> (<tt class="docutils literal"><span class="pre">*</span></tt>) &#8211; Member&#8217;s default value.</li>
 <li><strong>getter_name</strong> (<tt class="docutils literal"><span class="pre">str|None</span></tt>) &#8211; Custom getter name. This can be useful when the member is a boolean. (Ex.: <tt class="docutils literal"><span class="pre">is_alive</span></tt>)</li>
-<li><strong>contract</strong> (<tt class="docutils literal"><span class="pre">*</span></tt>) &#8211; <p>Type constraint. See <a class="reference external" href="http://andreacensi.github.com/contracts/">PyContracts</a></p>
-</li>
+<li><strong>contract</strong> (<tt class="docutils literal"><span class="pre">*</span></tt>) &#8211; Type constraint. See <a class="reference external" href="http://andreacensi.github.com/contracts/">PyContracts</a></li>
 <li><strong>setter_name</strong> (<tt class="docutils literal"><span class="pre">str|None</span></tt>) &#8211; Custom setter name.</li>
 <li><strong>member_name</strong> (<tt class="docutils literal"><span class="pre">str</span></tt>) &#8211; Name of the member to synthesize.</li>
 <li><strong>private_member_name</strong> (<tt class="docutils literal"><span class="pre">str|None</span></tt>) &#8211; Custom name for the private attribute that contains the member&#8217;s value.</li>
@@ -321,7 +153,7 @@ to implement some additional processing.</p>
 
 </div>
 <div class="section" id="camelcase-notation">
-<h3>CamelCase notation<a class="headerlink" href="#camelcase-notation" title="Permalink to this headline">¶</a></h3>
+<h2>CamelCase notation<a class="headerlink" href="#camelcase-notation" title="Permalink to this headline">¶</a></h2>
 <p>Sorry Guido, but I like CamelCase.</p>
 <dl class="function">
 <dt id="synthetic.namingConvention">
@@ -430,15 +262,6 @@ to implement some additional processing.</p>
 
 </div>
 </div>
-<div class="section" id="indices-and-tables">
-<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
-<ul class="simple">
-<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
-<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
-<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
-</ul>
-</div>
-</div>
 
 
           </div>
@@ -446,34 +269,18 @@ to implement some additional processing.</p>
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
-  <h3><a href="#">Table Of Contents</a></h3>
+  <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
-<li><a class="reference internal" href="#">Be synthetic with PySynthetic</a><ul>
-<li><a class="reference internal" href="#resources">Resources</a></li>
-<li><a class="reference internal" href="#examples">Examples</a><ul>
-<li><a class="reference internal" href="#synthetic-properties">Synthetic properties</a></li>
-<li><a class="reference internal" href="#synthetic-accessors">Synthetic accessors</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#advanced-usage">Advanced usage</a><ul>
-<li><a class="reference internal" href="#override-synthesized-member-s-accessors">Override synthesized member&#8217;s accessors</a></li>
-<li><a class="reference internal" href="#override-synthesized-property">Override synthesized property</a></li>
-<li><a class="reference internal" href="#override-synthesized-constructor">Override synthesized constructor</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#module-documentation">Module documentation</a><ul>
+<li><a class="reference internal" href="#">Module documentation</a><ul>
 <li><a class="reference internal" href="#underscore-notation">Underscore notation</a></li>
 <li><a class="reference internal" href="#camelcase-notation">CamelCase notation</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 </li>
 </ul>
 
   <h3>This Page</h3>
   <ul class="this-page-menu">
-    <li><a href="_sources/index.txt"
+    <li><a href="_sources/module_documentation.txt"
            rel="nofollow">Show Source</a></li>
   </ul>
 <div id="searchbox" style="display: none">
@@ -499,7 +306,7 @@ to implement some additional processing.</p>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
-        <li><a href="#">PySynthetic 0.4.5 documentation</a> &raquo;</li> 
+        <li><a href="index.html">PySynthetic 0.4.5 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
