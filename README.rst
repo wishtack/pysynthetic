@@ -1,16 +1,11 @@
-.. PySynthetic documentation master file, created by
-   sphinx-quickstart on Fri Mar  1 21:46:19 2013.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
-.. _pysynthetic:
+.. include doesn't work on github so we have to duplicate the whole stuff.
 
 Be synthetic with PySynthetic
 #############################
 
 **PySynthetic** is a set of tools that aims to make writing Python classes shorter and "cleaner".
 
-For instance, one can add properties and accessors *(getters/setters)* to a class with only one line of code *(using respectively* :meth:`synthesize_property <synthetic.synthesize_property>` *and* :meth:`synthesize_member <synthetic.synthesize_member>` *decorators)*, thus making the code `more than 5 times shorter <synthetic-properties>`_. One can even avoid the laborious task of members initialization by using the :meth:`synthesize_constructor <synthetic.synthesize_constructor>` decorator that takes care of writing the ``__init__`` method.
+For instance, one can add properties and accessors *(getters/setters)* to a class with only one line of code *(using respectively* ``synthesize_property`` *and* ``synthesize_member`` *decorators)*, thus making the code `more than 5 times shorter <synthetic-properties>`_. One can even avoid the laborious task of members initialization by using the ``synthesize_constructor`` decorator that takes care of writing the ``__init__`` method.
 
 **PySynthetic** is also useful for applying strict type checking with no pain just by using the decorators' ``contract`` argument *(see* `PyContracts <http://andreacensi.github.com/contracts/>`_ *)*.
 
@@ -20,10 +15,18 @@ For instance, one can add properties and accessors *(getters/setters)* to a clas
 .. image:: https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif
     :target: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yjaaidi%40gmail%2ecom&lc=US&item_name=yjaaidi&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted
 
-Examples
-********
+Resources
+*********
+
+* `Documentation <http://pysynthetic.readthedocs.org/>`_
+* `Bug Tracker <http://github.com/yjaaidi/pysynthetic/issues>`_
+* `Code <http://github.com/yjaaidi/pysynthetic>`_
+* `Mailing List <https://groups.google.com/group/pysynthetic>`_ <pysynthetic@googlegroups.com>
 
 .. _examples-synthetic-properties:
+
+Examples
+********
 
 Synthetic properties
 ====================
@@ -147,75 +150,3 @@ This way, the following code *(8 lines)*...
         
         def c(self):
             return self._c
-
-Advanced usage
-**************
-
-Override synthesized member's accessors
-=======================================
-
-One can override the synthesized member's accessors by simply explicitly writing the methods.
-
-Override synthesized property
-=============================
-
-One can override the synthesized property by simply explicitly writing the properties.
-
-**Remark:** For the moment, it's impossible to override the property's setter without overriding the getter.
-
-Override synthesized constructor
-================================
-
-One can use synthesized constructors to initialize members and properties values and still override it
-to implement some additional processing.
-
-Example:
-
-.. code-block:: python
-
-    @synthesize_constructor()
-    @synthesize_property('value')
-    class Double:
-        def __init__(self):
-            self._value *= 2
-
-    print(Double(10).value)
-
-Displays
-
-.. code-block:: python
-
-    20
-
-The custom constructor can consume extra arguments *(not synthesized members or properties)*.
-
-For more examples, see product's unit tests.
-
-Module documentation
-********************
-
-Underscore notation
-===================
-
-.. autofunction:: synthetic.naming_convention
-.. autofunction:: synthetic.synthesize_constructor
-.. autofunction:: synthetic.synthesize_member
-.. autofunction:: synthetic.synthesize_property
-
-CamelCase notation
-==================
-
-Sorry Guido, but I like CamelCase.
-
-.. autofunction:: synthetic.namingConvention
-.. autofunction:: synthetic.synthesizeConstructor
-.. autofunction:: synthetic.synthesizeMember
-.. autofunction:: synthetic.synthesizeProperty
-
-Indices and tables
-******************
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-

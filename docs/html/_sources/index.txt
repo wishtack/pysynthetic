@@ -10,9 +10,15 @@ Be synthetic with PySynthetic
 
 **PySynthetic** is a set of tools that aims to make writing Python classes shorter and "cleaner".
 
-For instance, one can add properties and accessors *(getters/setters)* to a class with only one line of code *(using respectively* :meth:`synthesize_property <synthetic.synthesize_property>` *and* :meth:`synthesize_member <synthetic.synthesize_member>` *decorators)*, thus making the code :ref:`more than 5 times shorter <examples-synthetic-properties>`. One can even avoid the laborious task of members initialization by using the :meth:`synthesize_constructor <synthetic.synthesize_constructor>` decorator that takes care of writing the ``__init__`` method.
+For instance, one can add properties and accessors *(getters/setters)* to a class with only one line of code *(using respectively* :meth:`synthesize_property <synthetic.synthesize_property>` *and* :meth:`synthesize_member <synthetic.synthesize_member>` *decorators)*, thus making the code `more than 5 times shorter <synthetic-properties>`_. One can even avoid the laborious task of members initialization by using the :meth:`synthesize_constructor <synthetic.synthesize_constructor>` decorator that takes care of writing the ``__init__`` method.
 
 **PySynthetic** is also useful for applying strict type checking with no pain just by using the decorators' ``contract`` argument *(see* `PyContracts <http://andreacensi.github.com/contracts/>`_ *)*.
+
+.. image:: https://api.flattr.com/button/flattr-badge-large.png
+    :target: https://flattr.com/thing/1167227/
+
+.. image:: https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif
+    :target: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=yjaaidi%40gmail%2ecom&lc=US&item_name=yjaaidi&currency_code=EUR&bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted
 
 Examples
 ********
@@ -23,7 +29,8 @@ Synthetic properties
 ====================
 
 With PySynthetic, the following code *(8 lines)*...
-::
+
+.. code-block:: python
 
     from synthetic import synthesize_constructor, synthesize_property
     
@@ -35,7 +42,8 @@ With PySynthetic, the following code *(8 lines)*...
         pass
 
 ... replaces this *(43 lines)*:
-::
+
+.. code-block:: python
 
     from contracts import contract
     
@@ -86,7 +94,8 @@ Synthetic accessors
 But, if you are more into accessors than properties, you can use :meth:`synthesize_member <synthetic.synthesize_member>` decorator instead.
 
 This way, the following code *(8 lines)*...
-::
+
+.. code-block:: python
 
     from synthetic import synthesize_constructor, synthesize_member
     
@@ -98,7 +107,8 @@ This way, the following code *(8 lines)*...
         pass
 
 ...will replace this *(37 lines)*:
-::
+
+.. code-block:: python
 
     from contracts import contract
     
@@ -160,7 +170,8 @@ One can use synthesized constructors to initialize members and properties values
 to implement some additional processing.
 
 Example:
-::
+
+.. code-block:: python
 
     @synthesize_constructor()
     @synthesize_property('value')
@@ -171,7 +182,8 @@ Example:
     print(Double(10).value)
 
 Displays
-::
+
+.. code-block:: python
 
     20
 
