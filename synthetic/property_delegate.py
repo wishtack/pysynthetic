@@ -7,10 +7,22 @@
 # $Id$
 #
 
+from .exceptions import SyntheticError
 from .i_member_delegate import IMemberDelegate
-from contracts import new_contract
+from contracts import contract, new_contract
 
 new_contract('IMemberFactory', IMemberDelegate)
+
+class InvalidPropertyOverrideError(SyntheticError):
+
+    @contract
+    def __init__(self, memberName, className):
+        """
+    :type memberName: str
+    :type className: str
+"""
+        super(InvalidPropertyOverrideError, self).__init__("Member '%s' for class '%s' must be overridden with a property." \
+                                                           % (memberName, className))
 
 class PropertyDelegate(IMemberDelegate):
 
@@ -26,7 +38,6 @@ class PropertyDelegate(IMemberDelegate):
     :type memberName: str
     :type classNamingConvention: INamingConvention|None
 """
-        
         # The new property.
         originalProperty = None
         if memberName in originalMemberNameList:
@@ -34,7 +45,7 @@ class PropertyDelegate(IMemberDelegate):
             
             # There's already a member with that name and it's not a property
             if not isinstance(member, property):
-                return
+                raise InvalidPropertyOverrideError(memberName, cls.__name__)
             
             # If property already exists, we will just modify it.
             originalProperty = member

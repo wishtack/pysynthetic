@@ -53,9 +53,6 @@ class SyntheticMember:
     def default(self):
         return self._default
     
-    def contract(self):
-        return self._contract
-    
     def privateMemberName(self):
         return self._privateMemberName
 
