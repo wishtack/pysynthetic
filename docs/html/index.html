@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Be synthetic with PySynthetic &mdash; PySynthetic 0.4.1 documentation</title>
+    <title>Be synthetic with PySynthetic &mdash; PySynthetic 0.4.4 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.4.1',
+        VERSION:     '0.4.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PySynthetic 0.4.1 documentation" href="#" /> 
+    <link rel="top" title="PySynthetic 0.4.4 documentation" href="#" /> 
   </head>
   <body>
     <div class="related">
@@ -34,7 +34,7 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li><a href="#">PySynthetic 0.4.1 documentation</a> &raquo;</li> 
+        <li><a href="#">PySynthetic 0.4.4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -48,6 +48,7 @@
 <p><strong>PySynthetic</strong> is a set of tools that aims to make writing Python classes shorter and &#8220;cleaner&#8221;.</p>
 <p>For instance, one can add properties and accessors <em>(getters/setters)</em> to a class with only one line of code <em>(using respectively</em> <a class="reference internal" href="#synthetic.synthesize_property" title="synthetic.synthesize_property"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_property</span></tt></a> <em>and</em> <a class="reference internal" href="#synthetic.synthesize_member" title="synthetic.synthesize_member"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_member</span></tt></a> <em>decorators)</em>, thus making the code <a class="reference external" href="synthetic-properties">more than 5 times shorter</a>. One can even avoid the laborious task of members initialization by using the <a class="reference internal" href="#synthetic.synthesize_constructor" title="synthetic.synthesize_constructor"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_constructor</span></tt></a> decorator that takes care of writing the <tt class="docutils literal"><span class="pre">__init__</span></tt> method.</p>
 <p><strong>PySynthetic</strong> is also useful for applying strict type checking with no pain just by using the decorators&#8217; <tt class="docutils literal"><span class="pre">contract</span></tt> argument <em>(see</em> <a class="reference external" href="http://andreacensi.github.com/contracts/">PyContracts</a> <em>)</em>.</p>
+<p>Help and ideas are appreciated! Thank you!</p>
 <a class="reference external image-reference" href="https://flattr.com/thing/1167227/"><img alt="https://api.flattr.com/button/flattr-badge-large.png" src="https://api.flattr.com/button/flattr-badge-large.png" /></a>
 <a class="reference external image-reference" href="https://www.paypal.com/cgi-bin/webscr?cmd=_donations&amp;business=yjaaidi%40gmail%2ecom&amp;lc=US&amp;item_name=yjaaidi&amp;currency_code=EUR&amp;bn=PP%2dDonationsBF%3abtn_donate_SM%2egif%3aNonHosted"><img alt="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" /></a>
 <div class="section" id="examples">
@@ -234,7 +235,15 @@ to implement some additional processing.</p>
 <p>By default, the setter will be named <tt class="docutils literal"><span class="pre">member_name</span></tt> with &#8216;set_&#8217; prepended it to it.
 (Ex.: <tt class="docutils literal"><span class="pre">member_name</span> <span class="pre">=</span> <span class="pre">'member'</span> <span class="pre">=&gt;</span> <span class="pre">instance.set_member(...)</span></tt>)</p>
 <p>By default, the private attribute containing the member&#8217;s value will be named <tt class="docutils literal"><span class="pre">member_name</span></tt> with &#8216;_&#8217; prepended to it.</p>
-<p class="last">Naming convention can be overridden with a custom one using <tt class="xref py py-meth docutils literal"><span class="pre">naming_convention</span></tt> decorator.</p>
+<p>Naming convention can be overridden with a custom one using <tt class="xref py py-meth docutils literal"><span class="pre">naming_convention</span></tt> decorator.</p>
+<table class="last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">raises:</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">DuplicateMemberNameError</span></tt> when two synthetic members have the same name.</td>
+</tr>
+</tbody>
+</table>
 </dd>
 </dl>
 <table class="docutils field-list" frame="void" rules="none">
@@ -272,6 +281,16 @@ to implement some additional processing.</p>
 </table>
 <p>By default, the private attribute containing the property&#8217;s value will be named <tt class="docutils literal"><span class="pre">property_name</span></tt> with &#8216;_&#8217; prepended to it.</p>
 <p>Naming convention can be overridden with a custom one using <tt class="xref py py-meth docutils literal"><span class="pre">naming_convention</span></tt> decorator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">raises:</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">DuplicateMemberNameError</span></tt> when two synthetic members have the same name.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">raises:</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">InvalidPropertyOverrideError</span></tt> when there&#8217;s already a member with that name and which is not a property.</td>
+</tr>
+</tbody>
+</table>
 </div></blockquote>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -325,7 +344,15 @@ to implement some additional processing.</p>
 <p>By default, the setter will be named <tt class="docutils literal"><span class="pre">memberName</span></tt> with the first letter capitalized and &#8216;set&#8217; prepended it to it.
 (Ex.: <tt class="docutils literal"><span class="pre">memberName</span> <span class="pre">=</span> <span class="pre">&quot;member&quot;</span> <span class="pre">=&gt;</span> <span class="pre">instance.setMember(...)</span></tt>)</p>
 <p>By default, the private attribute containing the member&#8217;s value will be named <tt class="docutils literal"><span class="pre">memberName</span></tt> with &#8216;_&#8217; prepended to it.</p>
-<p class="last">Naming convention can be overridden with a custom one using <tt class="xref py py-meth docutils literal"><span class="pre">namingConvention</span></tt> decorator.</p>
+<p>Naming convention can be overridden with a custom one using <tt class="xref py py-meth docutils literal"><span class="pre">namingConvention</span></tt> decorator.</p>
+<table class="last docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">raises:</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">DuplicateMemberNameError</span></tt> when two synthetic members have the same name.</td>
+</tr>
+</tbody>
+</table>
 </dd>
 </dl>
 <table class="docutils field-list" frame="void" rules="none">
@@ -363,6 +390,16 @@ to implement some additional processing.</p>
 </table>
 <p>By default, the private attribute containing the property&#8217;s value will be named <tt class="docutils literal"><span class="pre">propertyName</span></tt> with &#8216;_&#8217; prepended to it.</p>
 <p>Naming convention can be overridden with a custom one using <tt class="xref py py-meth docutils literal"><span class="pre">namingConvention</span></tt> decorator.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">raises:</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">DuplicateMemberNameError</span></tt> when two synthetic members have the same name.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">raises:</th><td class="field-body"><tt class="xref py py-class docutils literal"><span class="pre">InvalidPropertyOverrideError</span></tt> when there&#8217;s already a member with that name and which is not a property.</td>
+</tr>
+</tbody>
+</table>
 </div></blockquote>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -452,7 +489,7 @@ to implement some additional processing.</p>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
-        <li><a href="#">PySynthetic 0.4.1 documentation</a> &raquo;</li> 
+        <li><a href="#">PySynthetic 0.4.4 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
