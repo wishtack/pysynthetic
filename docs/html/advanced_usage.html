@@ -1,0 +1,132 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Advanced usage &mdash; PySynthetic 0.4.5 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.4.5',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PySynthetic 0.4.5 documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="index.html">PySynthetic 0.4.5 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="advanced-usage">
+<h1>Advanced usage<a class="headerlink" href="#advanced-usage" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="override-synthesized-member-s-accessors">
+<h2>Override synthesized member&#8217;s accessors<a class="headerlink" href="#override-synthesized-member-s-accessors" title="Permalink to this headline">¶</a></h2>
+<p>One can override the synthesized member&#8217;s accessors by simply explicitly writing the methods.</p>
+</div>
+<div class="section" id="override-synthesized-property">
+<h2>Override synthesized property<a class="headerlink" href="#override-synthesized-property" title="Permalink to this headline">¶</a></h2>
+<p>One can override the synthesized property by simply explicitly writing the properties.</p>
+<p><strong>Remark:</strong> For the moment, it&#8217;s impossible to override the property&#8217;s setter without overriding the getter.</p>
+</div>
+<div class="section" id="override-synthesized-constructor">
+<h2>Override synthesized constructor<a class="headerlink" href="#override-synthesized-constructor" title="Permalink to this headline">¶</a></h2>
+<p>One can use synthesized constructors to initialize members and properties values and still override it
+to implement some additional processing.</p>
+<p>Example:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="nd">@synthesize_constructor</span><span class="p">()</span>
+<span class="nd">@synthesize_property</span><span class="p">(</span><span class="s">&#39;value&#39;</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Double</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_value</span> <span class="o">*=</span> <span class="mi">2</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">Double</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Displays</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="mi">20</span>
+</pre></div>
+</div>
+<p>The custom constructor can consume extra arguments <em>(not synthesized members or properties)</em>.</p>
+<p>For more examples, see product&#8217;s unit tests.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Advanced usage</a><ul>
+<li><a class="reference internal" href="#override-synthesized-member-s-accessors">Override synthesized member&#8217;s accessors</a></li>
+<li><a class="reference internal" href="#override-synthesized-property">Override synthesized property</a></li>
+<li><a class="reference internal" href="#override-synthesized-constructor">Override synthesized constructor</a></li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/advanced_usage.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="index.html">PySynthetic 0.4.5 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Younes JAAIDI.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
