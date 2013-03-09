@@ -6,14 +6,16 @@
 #
 # $Id$
 #
-from contracts import contract, new_contract
+
+from .exceptions import SyntheticError
 from .i_naming_convention import INamingConvention
 from .synthetic_member import SyntheticMember
+from contracts import contract, new_contract
 
 new_contract('SyntheticMember', SyntheticMember)
 new_contract('INamingConvetion', INamingConvention)
 
-class DuplicateMemberNameError(Exception):
+class DuplicateMemberNameError(SyntheticError):
 
     @contract
     def __init__(self, memberName, className):
@@ -23,6 +25,7 @@ class DuplicateMemberNameError(Exception):
 """
         super(DuplicateMemberNameError, self).__init__("Duplicate member name '%s' for class '%s'." % (memberName,
                                                                                                        className))
+
 class SyntheticMetaData:
 
     def __init__(self, cls, originalConstructor, originalMemberNameList):

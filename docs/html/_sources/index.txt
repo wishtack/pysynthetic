@@ -14,6 +14,8 @@ For instance, one can add properties and accessors *(getters/setters)* to a clas
 
 **PySynthetic** is also useful for applying strict type checking with no pain just by using the decorators' ``contract`` argument *(see* `PyContracts <http://andreacensi.github.com/contracts/>`_ *)*.
 
+Help and ideas are appreciated! Thank you!
+
 .. image:: https://api.flattr.com/button/flattr-badge-large.png
     :target: https://flattr.com/thing/1167227/
 

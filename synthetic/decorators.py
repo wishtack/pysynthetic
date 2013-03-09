@@ -51,6 +51,8 @@ def synthesizeMember(memberName,
     :type setterName: str|None
     :param privateMemberName: Custom name for the private attribute that contains the member's value.
     :type privateMemberName: str|None
+    
+    :raises: :class:`DuplicateMemberNameError` when two synthetic members have the same name.
 """
     accessorDelegate = AccessorDelegate(namingConvention = NamingConventionCamelCase(),
                                         getterName = getterName,
@@ -96,6 +98,8 @@ def synthesize_member(member_name,
     :type setter_name: str|None
     :param private_member_name: Custom name for the private attribute that contains the member's value.
     :type private_member_name: str|None
+    
+    :raises: :class:`DuplicateMemberNameError` when two synthetic members have the same name.
 """
     accessorDelegate = AccessorDelegate(namingConvention = NamingConventionUnderscore(),
                                        getterName = getter_name,
@@ -133,6 +137,9 @@ def synthesizeProperty(propertyName,
     :type readOnly: bool
     :param privateMemberName: Custom name for the private attribute that contains the property's value.
     :type privateMemberName: str|None
+
+    :raises: :class:`DuplicateMemberNameError` when two synthetic members have the same name.
+    :raises: :class:`InvalidPropertyOverrideError` when there's already a member with that name and which is not a property.
 """
     return SyntheticDecoratorFactory().syntheticMemberDecorator(memberName = propertyName,
                                                                 defaultValue = default,
@@ -166,6 +173,9 @@ def synthesize_property(property_name,
     :type read_only: bool
     :param private_member_name: Custom name for the private attribute that contains the property's value.
     :type private_member_name: str|None
+    
+    :raises: :class:`DuplicateMemberNameError` when two synthetic members have the same name.
+    :raises: :class:`InvalidPropertyOverrideError` when there's already a member with that name and which is not a property.
 """
     return SyntheticDecoratorFactory().syntheticMemberDecorator(memberName = property_name,
                                                                 defaultValue = default,

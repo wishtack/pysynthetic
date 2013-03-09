@@ -8,16 +8,16 @@
 #
 
 from contracts import ContractNotRespected
-from synthetic import DuplicateMemberNameError, \
-                      NamingConventionCamelCase, NamingConventionUnderscore, \
-                      synthesizeProperty, synthesize_member, \
-                      synthesizeProperty, synthesize_property, \
-                      namingConvention, naming_convention
+from synthetic import DuplicateMemberNameError, InvalidPropertyOverrideError, \
+    NamingConventionCamelCase, NamingConventionUnderscore, \
+    synthesizeProperty, synthesize_member, \
+    synthesizeProperty, synthesize_property, \
+    namingConvention, naming_convention
 import contracts
 import unittest
 
 @synthesizeProperty('minimalistProperty')
-@synthesizeProperty('propertyWithDefaultValue', default = "default")
+@synthesize_property('propertyWithDefaultValue', default = "default")
 @synthesizeProperty('customProperty',
                     privateMemberName = '_internalPrivateSecretMemberThatShouldNeverBeUsedOutsideThisClass')
 class TestBasic(object):
@@ -51,6 +51,11 @@ class TestOverriddenProperties(object):
     @property
     def propertyWithOverriddenGetter(self):
         return 'property_with_custom_getter_value'
+
+class TestInvalidPropertyOverride(object):
+
+    def member(self):
+        pass
 
 class TestClass(object):
     pass
@@ -144,6 +149,17 @@ Variables bound in inner context:
         instance.propertyString = 10
         instance.propertyStringList = ["a", 2]
 
+    def testInvalidPropertyOverride(self):
+        # Equivalent to:
+        # @synthesizeProperty('member')
+        # class TestInvalidOverride(object):
+        #     
+        #     def member(self):
+        #         return 10
+
+        self.assertRaises(InvalidPropertyOverrideError, synthesizeProperty('member'), TestInvalidPropertyOverride)
+        
+        
     def testDuplicateMemberName(self):
         # Equivalent to:
         # @syntheticMember('member')
