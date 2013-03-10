@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Be synthetic with PySynthetic &mdash; PySynthetic 0.4.5 documentation</title>
+    <title>Be synthetic with PySynthetic &mdash; PySynthetic 0.4.8 documentation</title>
     
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.4.5',
+        VERSION:     '0.4.8',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PySynthetic 0.4.5 documentation" href="#" /> 
+    <link rel="top" title="PySynthetic 0.4.8 documentation" href="#" /> 
   </head>
   <body>
     <div class="related">
@@ -34,7 +34,7 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
-        <li><a href="#">PySynthetic 0.4.5 documentation</a> &raquo;</li> 
+        <li><a href="#">PySynthetic 0.4.8 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -46,7 +46,7 @@
   <div class="section" id="be-synthetic-with-pysynthetic">
 <h1>Be synthetic with PySynthetic<a class="headerlink" href="#be-synthetic-with-pysynthetic" title="Permalink to this headline">¶</a></h1>
 <p><strong>PySynthetic</strong> is a set of tools that aims to make writing Python classes shorter and &#8220;cleaner&#8221;.</p>
-<p>For instance, one can add properties and accessors <em>(getters/setters)</em> to a class with only one line of code <em>(using respectively</em> <a class="reference internal" href="#synthetic.synthesize_property" title="synthetic.synthesize_property"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_property</span></tt></a> <em>and</em> <a class="reference internal" href="#synthetic.synthesize_member" title="synthetic.synthesize_member"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_member</span></tt></a> <em>decorators)</em>, thus making the code more than 5 times shorter <em>(see</em> <a class="reference internal" href="#examples">examples</a> <em>)</em>. One can even avoid the laborious task of members initialization by using the <a class="reference internal" href="#synthetic.synthesize_constructor" title="synthetic.synthesize_constructor"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_constructor</span></tt></a> decorator that takes care of writing the <tt class="docutils literal"><span class="pre">__init__</span></tt> method.</p>
+<p>For instance, one can add properties and accessors <em>(getters/setters)</em> to a class with only one line of code <em>(using respectively</em> <a class="reference internal" href="module_documentation.html#synthetic.synthesize_property" title="synthetic.synthesize_property"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_property</span></tt></a> <em>and</em> <a class="reference internal" href="module_documentation.html#synthetic.synthesize_member" title="synthetic.synthesize_member"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_member</span></tt></a> <em>decorators)</em>, thus making the code more than 5 times shorter <em>(see</em> <a class="reference internal" href="#examples">examples</a> <em>)</em>. One can even avoid the laborious task of members initialization by using the <a class="reference internal" href="module_documentation.html#synthetic.synthesize_constructor" title="synthetic.synthesize_constructor"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_constructor</span></tt></a> decorator that takes care of writing the <tt class="docutils literal"><span class="pre">__init__</span></tt> method.</p>
 <p><strong>PySynthetic</strong> is also useful for applying strict type checking with no pain just by using the decorators&#8217; <tt class="docutils literal"><span class="pre">contract</span></tt> argument <em>(see</em> <a class="reference external" href="http://andreacensi.github.com/contracts/">PyContracts</a> <em>)</em>.</p>
 <p>Help and ideas are appreciated! Thank you!</p>
 <a class="reference external image-reference" href="https://flattr.com/thing/1167227/"><img alt="https://api.flattr.com/button/flattr-badge-large.png" src="https://api.flattr.com/button/flattr-badge-large.png" /></a>
@@ -59,6 +59,15 @@
 <li><a class="reference external" href="http://github.com/yjaaidi/pysynthetic">Code</a></li>
 <li><a class="reference external" href="https://groups.google.com/group/pysynthetic">Mailing List</a> &lt;<a class="reference external" href="mailto:pysynthetic&#37;&#52;&#48;googlegroups&#46;com">pysynthetic<span>&#64;</span>googlegroups<span>&#46;</span>com</a>&gt;</li>
 </ul>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>As there is a temporary issue with the <strong>PySynthetic</strong> =&gt; <strong>PyContracts</strong> =&gt; <strong>PyParsing</strong> dependency chain (<strong>PyParsing</strong> &gt;= 2.0.0 is not compatible with Python 2), <strong>PySynthetic</strong> must be installed this way.</p>
+<div class="highlight-shell"><pre>pip install 'pyparsing&lt;2.0.0' pysynthetic</pre>
+</div>
+<p>Or simply from the tarball or source code if you are not using <em>pip</em>.</p>
+<div class="highlight-shell"><pre>python setup.py install</pre>
+</div>
 </div>
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
@@ -123,7 +132,7 @@
 </div>
 <div class="section" id="synthetic-accessors">
 <h3>Synthetic accessors<a class="headerlink" href="#synthetic-accessors" title="Permalink to this headline">¶</a></h3>
-<p>But, if you are more into accessors than properties, you can use <a class="reference internal" href="#synthetic.synthesize_member" title="synthetic.synthesize_member"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_member</span></tt></a> decorator instead.</p>
+<p>But, if you are more into accessors than properties, you can use <a class="reference internal" href="module_documentation.html#synthetic.synthesize_member" title="synthetic.synthesize_member"><tt class="xref py py-meth docutils literal"><span class="pre">synthesize_member</span></tt></a> decorator instead.</p>
 <p>This way, the following code <em>(8 lines)</em>...</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">synthetic</span> <span class="kn">import</span> <span class="n">synthesize_constructor</span><span class="p">,</span> <span class="n">synthesize_member</span>
 
@@ -450,6 +459,7 @@ to implement some additional processing.</p>
   <ul>
 <li><a class="reference internal" href="#">Be synthetic with PySynthetic</a><ul>
 <li><a class="reference internal" href="#resources">Resources</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#examples">Examples</a><ul>
 <li><a class="reference internal" href="#synthetic-properties">Synthetic properties</a></li>
 <li><a class="reference internal" href="#synthetic-accessors">Synthetic accessors</a></li>
@@ -499,7 +509,7 @@ to implement some additional processing.</p>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
-        <li><a href="#">PySynthetic 0.4.5 documentation</a> &raquo;</li> 
+        <li><a href="#">PySynthetic 0.4.8 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
