@@ -57,11 +57,11 @@ class SyntheticClassController:
 
     def _syntheticMetaData(self):
         # SyntheticMetaData does not exist...
-        syntheticMetaDataName = '__syntheticMetaData__'
+        syntheticMetaDataName = '__syntheticMetaData__{className}'.format(className=self._class.__name__)
         if not hasattr(self._class, syntheticMetaDataName):
             # ...we create it.
             originalConstructor = getattr(self._class, '__init__', None)
-            
+
             # List of existing methods (Python2: ismethod, Python3: isfunction).
             originalMemberList = inspect.getmembers(self._class)
             originalMemberNameList = [method[0] for method in originalMemberList]
@@ -82,6 +82,7 @@ the getters and setters because the naming convention has changed.
         constructor = self._constructorFactory.makeConstructor(syntheticMetaData.originalConstructor(),
                                                                syntheticMetaData.syntheticMemberList(),
                                                                syntheticMetaData.doesConsumeArguments())
+
         self._class.__init__ = constructor
         for syntheticMember in syntheticMetaData.syntheticMemberList():
             syntheticMember.apply(self._class,
