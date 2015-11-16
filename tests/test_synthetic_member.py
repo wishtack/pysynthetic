@@ -173,15 +173,8 @@ We also check that there's no bug if the naming convention is changed.
         self.assertRaises(ContractNotRespected, instance.setMemberStringList, ["a", 2])
 
         # Checking exception message.
-        try:
+        with self.assertRaisesRegexp(ContractNotRespected, r"""Expected type 'str', got <type 'int'>"""):
             instance.setMemberString(10)
-            self.fail("Exception not raised.")
-        except ContractNotRespected as e:
-            self.assertEqual("""\
-Expected type 'str', got 'int'.
-checking: str   for value: Instance of int: 10   
-Variables bound in inner context:
-- memberString: Instance of int: 10""", str(e))
 
     def testContractDisabled(self):
         instance = TestContract()

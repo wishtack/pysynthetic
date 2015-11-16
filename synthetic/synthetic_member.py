@@ -65,7 +65,7 @@ class SyntheticMember:
         if contracts.all_disabled():
             return
         
-        self._contract._check_contract(value = value, context = {argumentName: value})
+        self._contract._check_contract(value=value, context={argumentName: value}, silent=False)
 
     def apply(self, cls, originalMemberNameList, classNamingConvention):
         """
