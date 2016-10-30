@@ -28,7 +28,8 @@ class DuplicateMemberNameError(SyntheticError):
 
 class SyntheticMetaData:
 
-    def __init__(self, cls, originalConstructor, originalEqualFunction, originalNotEqualFunction, originalHashFuction, originalMemberNameList):
+    def __init__(self, cls, originalConstructor, originalEqualFunction, originalNotEqualFunction, originalHashFuction,
+                 originalMemberNameList):
         """
         :type originalMemberNameList: list(str)
         :type namingConvention: INamingConvention|None
