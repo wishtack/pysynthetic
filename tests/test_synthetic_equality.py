@@ -68,6 +68,22 @@ class TestChildWithReadOnlyMembers(TestIntermediate):
     pass
 
 
+@synthesizeMember('baseMember', readOnly=True)
+@synthesizeMember('baseProperty', readOnly=True)
+@synthesizeConstructor()
+@synthesizeEquality()
+class TestImmutableBase(object):
+    pass
+
+
+@synthesizeMember('childMember', readOnly=True)
+@synthesizeProperty('childProperty', readOnly=True)
+@synthesizeConstructor()
+@synthesizeEquality()
+class TestImmutableChild(TestImmutableBase):
+    pass
+
+
 class TestSynthesizeEquality(unittest.TestCase):
     def assertCompareEqual(self, first, second):
         self.assertEqual(True, first == second)
@@ -175,6 +191,22 @@ class TestSynthesizeEquality(unittest.TestCase):
     def testInheritanceOfMutableClassByImmutableClassIsNotHashable(self):
         first = TestChildWithReadOnlyMembers(readonlyMember=1, readonlyProperty=2)
         self.assertNotIsInstance(first, collections.Hashable)
+
+    def testInheritanceImmutable(self):
+        first = TestImmutableChild(baseMember=1, baseProperty=2, childMember=3, childProperty=4)
+        second = TestImmutableChild(baseMember=1, baseProperty=2, childMember=3, childProperty=4)
+
+        self.assertCompareEqual(first, second)
+        self.assertIsInstance(first, collections.Hashable)
+        self.assertEqual(hash(first), hash(second))
+
+    def testBaseClassHashIsTakenInAccountInChildHash(self):
+        first = TestImmutableChild(baseMember=4, baseProperty=3, childMember=3, childProperty=4)
+        second = TestImmutableChild(baseMember=1, baseProperty=2, childMember=3, childProperty=4)
+
+        self.assertCompareNotEqual(first, second)
+        self.assertIsInstance(first, collections.Hashable)
+        self.assertNotEqual(hash(first), hash(second))
 
     @staticmethod
     def _resetChildInstance(instance):
