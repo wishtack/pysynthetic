@@ -1,1 +1,8 @@
+/.eggs
+/.idea
+/build
+/dist
+/pysynthetic.egg-info
+/pysynthetic.iml
+/venv*
 *.pyc
