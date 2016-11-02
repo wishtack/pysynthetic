@@ -8,6 +8,7 @@
 #
 
 from .i_naming_convention import INamingConvention
+from .synthetic_comparison_factory import SyntheticComparisonFactory
 from .synthetic_constructor_factory import SyntheticConstructorFactory
 from .synthetic_member import SyntheticMember
 from .synthetic_meta_data import SyntheticMetaData
@@ -21,6 +22,7 @@ class SyntheticClassController:
     
     def __init__(self, cls):
         self._constructorFactory = SyntheticConstructorFactory()
+        self._comparisonFactory = SyntheticComparisonFactory()
         self._class = cls
     
     @contract
@@ -40,7 +42,13 @@ class SyntheticClassController:
 
         # Update constructor and recreate accessors.
         self._updateConstructorAndMembers()
-    
+
+    def synthesizeEquality(self):
+        self._syntheticMetaData().setEqualityGeneration(True)
+
+        # Update constructor and recreate accessors.
+        self._updateConstructorAndMembers()
+
     @contract
     def setNamingConvention(self, namingConvention):
         """
@@ -61,6 +69,9 @@ class SyntheticClassController:
         if not hasattr(self._class, syntheticMetaDataName):
             # ...we create it.
             originalConstructor = getattr(self._class, '__init__', None)
+            originalEqualFunction = getattr(self._class, '__eq__', None)
+            originalNotEqualFunction = getattr(self._class, '__ne__', None)
+            originalHashFunction = getattr(self._class, '__hash__', None)
 
             # List of existing methods (Python2: ismethod, Python3: isfunction).
             originalMemberList = inspect.getmembers(self._class)
@@ -69,6 +80,9 @@ class SyntheticClassController:
             # Making the synthetic meta data.
             syntheticMetaData = SyntheticMetaData(cls = self._class,
                                                   originalConstructor = originalConstructor,
+                                                  originalEqualFunction= originalEqualFunction,
+                                                  originalNotEqualFunction= originalNotEqualFunction,
+                                                  originalHashFuction= originalHashFunction,
                                                   originalMemberNameList = originalMemberNameList)
             setattr(self._class, syntheticMetaDataName, syntheticMetaData)
         return getattr(self._class, syntheticMetaDataName)
@@ -88,6 +102,17 @@ the getters and setters because the naming convention has changed.
             syntheticMember.apply(self._class,
                                   syntheticMetaData.originalMemberNameList(),
                                   syntheticMetaData.namingConvention())
+
+        if syntheticMetaData.hasEqualityGeneration():
+            eq = self._comparisonFactory.makeEqualFunction(syntheticMetaData.originalEqualFunction(),
+                                                           syntheticMetaData.syntheticMemberList())
+            ne = self._comparisonFactory.makeNotEqualFunction(syntheticMetaData.originalNotEqualFunction(),
+                                                              syntheticMetaData.syntheticMemberList())
+            hashFunc = self._comparisonFactory.makeHashFunction(syntheticMetaData.originalHashFunction(),
+                                                                syntheticMetaData.syntheticMemberList())
+            self._class.__eq__ = eq
+            self._class.__ne__ = ne
+            self._class.__hash__ = hashFunc
 
     def _removeSyntheticMembers(self):
         syntheticMetaData = self._syntheticMetaData()

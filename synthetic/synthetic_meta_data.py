@@ -28,20 +28,34 @@ class DuplicateMemberNameError(SyntheticError):
 
 class SyntheticMetaData:
 
-    def __init__(self, cls, originalConstructor, originalMemberNameList):
+    def __init__(self, cls, originalConstructor, originalEqualFunction, originalNotEqualFunction, originalHashFuction,
+                 originalMemberNameList):
         """
-    :type originalMemberNameList: list(str)
-    :type namingConvention: INamingConvention|None
-"""
+        :type originalMemberNameList: list(str)
+        :type namingConvention: INamingConvention|None
+        """
         self._class = cls
         self._originalConstructor = originalConstructor
+        self._originalEqualFunction = originalEqualFunction
+        self._originalNotEqualFunction = originalNotEqualFunction
+        self._originalHashFunction = originalHashFuction
         self._originalMemberNameList = originalMemberNameList
         self._syntheticMemberList = []
         self._doesConsumeArguments = False
+        self._hasEqualityGeneration = False
         self._namingConvention = None
     
     def originalConstructor(self):
         return self._originalConstructor
+
+    def originalEqualFunction(self):
+        return self._originalEqualFunction
+
+    def originalNotEqualFunction(self):
+        return self._originalNotEqualFunction
+
+    def originalHashFunction(self):
+        return self._originalHashFunction
 
     def originalMemberNameList(self):
         return self._originalMemberNameList
@@ -67,6 +81,13 @@ class SyntheticMetaData:
 
     def setConsumeArguments(self, _consumeArguments):
         self._doesConsumeArguments = _consumeArguments
+
+    def hasEqualityGeneration(self):
+        """Tells if __eq__ and __neq__ functions should be generated"""
+        return self._hasEqualityGeneration
+
+    def setEqualityGeneration(self, equalityGeneration):
+        self._hasEqualityGeneration = equalityGeneration
     
     def namingConvention(self):
         return self._namingConvention
