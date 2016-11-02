@@ -56,6 +56,9 @@ class SyntheticMember:
     def privateMemberName(self):
         return self._privateMemberName
 
+    def readOnly(self):
+        return self._readOnly
+
     def checkContract(self, argumentName, value):
         # No contract to check.
         if self._contract is None:

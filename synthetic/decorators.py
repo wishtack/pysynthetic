@@ -191,6 +191,12 @@ def synthesizeConstructor():
 """
     return SyntheticDecoratorFactory().syntheticConstructorDecorator()
 
+def synthesizeEquality():
+    """
+    This class decorator will override the class's __eq__ and __neq__ operations
+    to be based on comparing the values of the synthetic members.
+    """
+    return SyntheticDecoratorFactory().syntheticEqualityDecorator()
 
 def namingConvention(namingConvention):
     """
@@ -213,3 +219,4 @@ def naming_convention(naming_convention):
     return SyntheticDecoratorFactory().namingConventionDecorator(naming_convention)  
 
 synthesize_constructor = synthesizeConstructor
+synthesize_equality = synthesizeEquality

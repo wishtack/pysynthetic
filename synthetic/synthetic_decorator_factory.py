@@ -53,6 +53,14 @@ class SyntheticDecoratorFactory:
 
             return cls
         return functionWrapper
+
+    def syntheticEqualityDecorator(self):
+        def functionWrapper(cls):
+            # This will be used to configure that equality operations should be generated
+            SyntheticClassController(cls).synthesizeEquality()
+
+            return cls
+        return functionWrapper
     
     def namingConventionDecorator(self, namingConvention):
         """
