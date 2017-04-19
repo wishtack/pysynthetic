@@ -17,5 +17,5 @@ __all__ = ['DuplicateMemberNameError', 'InvalidPropertyOverrideError', 'INamingC
            'naming_convention', 'synthesize_equality', 'synthesize_constructor',
            'synthesize_member', 'synthesize_property']
 
-__version__ = "0.5.1"
+__version__ = "0.5.2"
 

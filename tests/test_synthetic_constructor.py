@@ -91,10 +91,11 @@ class TestVariadicAndKewordedConstructor:
 
 
 class TestSynthesizeConstructor(unittest.TestCase):
+
     def setUp(self):
         contracts.enable_all()
 
-    def _testOK(self):
+    def test_ok(self):
 
         for cls in [TestConstructor, TestConstructorRandomDecoratorPosition]:
             instance = cls()
@@ -139,7 +140,7 @@ class TestSynthesizeConstructor(unittest.TestCase):
             self.assertEqual("default", instance.memberWithDefaultValue())
             self.assertEqual(2, instance.propertyWithDefaultValue)
 
-    def testInheritance(self):
+    def test_inheritance(self):
 
         # Checking that `TestChild`'s synthetic constructor doesn't act on base class.
         # Otherwise we would get an exception because `childMember` is not an integer.
@@ -178,7 +179,7 @@ class TestSynthesizeConstructor(unittest.TestCase):
         self.assertEqual(1, instance.baseMember())
         self.assertEqual(2, instance.baseProperty)
 
-    def _testCustomConstructor(self):
+    def test_custom_constructor(self):
         # TestCustomConstructor __init__ method takes 4 parameters
         # (overriddenMember, overriddenProperty and extraArgument) + self.
         self.assertRaises(TypeError, TestCustomConstructor)
@@ -345,7 +346,7 @@ class TestSynthesizeConstructor(unittest.TestCase):
                           "extra",
                           superfluousMember="superfluous")
 
-    def _testVariadicAndKeywordedArguments(self):
+    def _test_variadic_and_keyworded_arguments(self):
         instance = TestVariadicAndKewordedConstructor(1, 2, 3, 4, 5, memberC=10, propertyD=11, e=12)
         self.assertEqual(1, instance._aArgument)
         self.assertEqual(2, instance._bArgument)
@@ -356,7 +357,7 @@ class TestSynthesizeConstructor(unittest.TestCase):
         self.assertEqual(10, instance.memberC())
         self.assertEqual(11, instance.propertyD)
 
-    def _testContract(self):
+    def _test_contract(self):
         # OK.
         validKwargs = {'memberString': "Be free! Kill bureaucracy!!!",
                        'propertyString': "Be free! Kill bureaucracy!!!",
@@ -397,7 +398,7 @@ checking: str   for value: Instance of NoneType: None
 Variables bound in inner context:
 - memberString: Instance of NoneType: None""", str(e))
 
-    def _testContractDisabled(self):
+    def test_contract_disabled(self):
         validKwargs = {'memberString': "Be free! Kill bureaucracy!!!",
                        'propertyString': "Be free! Kill bureaucracy!!!",
                        'memberStringList': ["a", "b"],
@@ -428,3 +429,19 @@ Variables bound in inner context:
         kwargs = validKwargs.copy()
         kwargs['propertyStringList'] = ["a", 2]
         TestContract(**kwargs)
+
+    def test_unicode_kwargs(self):
+
+        kwargs = {
+            u"memberString": "Be free! Kill bureaucracy!!!",
+            u"propertyString": "Be free! Kill bureaucracy!!!",
+            u"memberStringList": ["a", "b"],
+            u"propertyStringList": ["a", "b"]
+        }
+
+        instance = TestContract(**kwargs)
+
+        self.assertEqual("Be free! Kill bureaucracy!!!", instance.memberString())
+        self.assertEqual("Be free! Kill bureaucracy!!!", instance.propertyString)
+        self.assertEqual(["a", "b"], instance.memberStringList())
+        self.assertEqual(["a", "b"], instance.propertyStringList)
