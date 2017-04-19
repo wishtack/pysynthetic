@@ -121,7 +121,7 @@ positional args specification, then it adds synthesized members at the end if th
 or default value otherwise.
     :type memberName: str
     :type positionalArgumentKeyValueList: list(tuple)
-    :type kwargs: dict(str:*)
+    :type kwargs: dict(string:*)
 """
         # Warning: we use this dict to simplify the usage of the key-value tuple list but be aware that this will
         # merge superfluous arguments as they have the same key : None.
@@ -149,7 +149,7 @@ If original constructor accepts keyworded args, all keyworded args are forwarded
     :type originalConstructorExpectedArgList: list(str)
     :type syntheticMemberList: list(SyntheticMember)
     :type positionalArgumentKeyValueList: list(tuple)
-    :type keywordedArgDict: dict(str:*)
+    :type keywordedArgDict: dict(string:*)
 """
 
         # List is initialized with all variadic arguments.
