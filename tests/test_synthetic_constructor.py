@@ -357,7 +357,7 @@ class TestSynthesizeConstructor(unittest.TestCase):
         self.assertEqual(10, instance.memberC())
         self.assertEqual(11, instance.propertyD)
 
-    def _test_contract(self):
+    def test_contract(self):
         # OK.
         validKwargs = {'memberString': "Be free! Kill bureaucracy!!!",
                        'propertyString': "Be free! Kill bureaucracy!!!",
@@ -393,10 +393,10 @@ class TestSynthesizeConstructor(unittest.TestCase):
             TestContract()
         except ContractNotRespected as e:
             self.assertEqual("""\
-Expected type 'str', got 'NoneType'.
-checking: str   for value: Instance of NoneType: None   
+Expected type 'str', got <type 'NoneType'>.
+checking: str   for value: Instance of <type 'NoneType'>: None   
 Variables bound in inner context:
-- memberString: Instance of NoneType: None""", str(e))
+- memberString: Instance of <type 'NoneType'>: None""", str(e))
 
     def test_contract_disabled(self):
         validKwargs = {'memberString': "Be free! Kill bureaucracy!!!",
